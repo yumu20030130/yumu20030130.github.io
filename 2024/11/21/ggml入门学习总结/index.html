@@ -4,13 +4,17 @@
   <meta charset="utf-8">
   
   
-  <title>Hexo</title>
+  <title>ggml入门学习总结 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://example.com/index.html">
+  <meta name="description" content="GGML参考链接：https:&#x2F;&#x2F;www.cnblogs.com&#x2F;huggingface&#x2F;p&#x2F;18387636 简介ggml 是一个用 C 和 C++ 编写、专注于 Transformer 架构模型推理的机器学习库。该项目完全开源，处于活跃的开发阶段，开发社区也在不断壮大。ggml 和 PyTorch、TensorFlow 等机器学习库比较相似，在llama.cpp中被广泛应用。 基本概念但由于">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ggml入门学习总结">
+<meta property="og:url" content="http://example.com/2024/11/21/ggml%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="GGML参考链接：https:&#x2F;&#x2F;www.cnblogs.com&#x2F;huggingface&#x2F;p&#x2F;18387636 简介ggml 是一个用 C 和 C++ 编写、专注于 Transformer 架构模型推理的机器学习库。该项目完全开源，处于活跃的开发阶段，开发社区也在不断壮大。ggml 和 PyTorch、TensorFlow 等机器学习库比较相似，在llama.cpp中被广泛应用。 基本概念但由于">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-11-21T11:44:36.000Z">
+<meta property="article:modified_time" content="2024-11-21T12:05:33.259Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
   
@@ -67,9 +71,7 @@
 </header>
 
       <div class="outer">
-        <section id="main">
-  
-    <article id="post-ggml入门学习总结" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+        <section id="main"><article id="post-ggml入门学习总结" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/11/21/ggml%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/" class="article-date">
   <time class="dt-published" datetime="2024-11-21T11:44:36.000Z" itemprop="datePublished">2024-11-21</time>
@@ -82,8 +84,8 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/11/21/ggml%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/">ggml入门学习总结</a>
+    <h1 class="p-name article-title" itemprop="headline name">
+      ggml入门学习总结
     </h1>
   
 
@@ -116,11 +118,7 @@
 </ol>
 <p>下面是一个矩阵相乘的例子：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;ggml.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">void</span>)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// initialize data of matrices to perform matrix multiplication</span></span><br><span class="line">    <span class="type">const</span> <span class="type">int</span> rows_A = <span class="number">4</span>, cols_A = <span class="number">2</span>;</span><br><span class="line">    <span class="type">float</span> matrix_A[rows_A * cols_A] = &#123;</span><br><span class="line">        <span class="number">2</span>, <span class="number">8</span>,</span><br><span class="line">        <span class="number">5</span>, <span class="number">1</span>,</span><br><span class="line">        <span class="number">4</span>, <span class="number">2</span>,</span><br><span class="line">        <span class="number">8</span>, <span class="number">6</span></span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="type">const</span> <span class="type">int</span> rows_B = <span class="number">3</span>, cols_B = <span class="number">2</span>;</span><br><span class="line">    <span class="type">float</span> matrix_B[rows_B * cols_B] = &#123;</span><br><span class="line">        <span class="number">10</span>, <span class="number">5</span>,</span><br><span class="line">        <span class="number">9</span>, <span class="number">9</span>,</span><br><span class="line">        <span class="number">5</span>, <span class="number">4</span></span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 1. Allocate `ggml_context` to store tensor data</span></span><br><span class="line">    <span class="comment">// Calculate the size needed to allocate</span></span><br><span class="line">    <span class="type">size_t</span> ctx_size = <span class="number">0</span>;</span><br><span class="line">    ctx_size += rows_A * cols_A * <span class="built_in">ggml_type_size</span>(GGML_TYPE_F32); <span class="comment">// tensor a</span></span><br><span class="line">    ctx_size += rows_B * cols_B * <span class="built_in">ggml_type_size</span>(GGML_TYPE_F32); <span class="comment">// tensor b</span></span><br><span class="line">    ctx_size += rows_A * rows_B * <span class="built_in">ggml_type_size</span>(GGML_TYPE_F32); <span class="comment">// result</span></span><br><span class="line">    ctx_size += <span class="number">3</span> * <span class="built_in">ggml_tensor_overhead</span>(); <span class="comment">// metadata for 3 tensors</span></span><br><span class="line">    ctx_size += <span class="built_in">ggml_graph_overhead</span>(); <span class="comment">// compute graph</span></span><br><span class="line">    ctx_size += <span class="number">1024</span>; <span class="comment">// some overhead (exact calculation omitted for simplicity)</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Allocate `ggml_context` to store tensor data</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">ggml_init_params</span> params = &#123;</span><br><span class="line">        <span class="comment">/*.mem_size =*/</span> ctx_size,</span><br><span class="line">        <span class="comment">/*.mem_buffer =*/</span> <span class="literal">NULL</span>,</span><br><span class="line">        <span class="comment">/*.no_alloc =*/</span> <span class="literal">false</span>,</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">ggml_context</span> * ctx = <span class="built_in">ggml_init</span>(params);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. Create tensors and set data</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">ggml_tensor</span> * tensor_a = <span class="built_in">ggml_new_tensor_2d</span>(ctx, GGML_TYPE_F32, cols_A, rows_A);</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">ggml_tensor</span> * tensor_b = <span class="built_in">ggml_new_tensor_2d</span>(ctx, GGML_TYPE_F32, cols_B, rows_B);</span><br><span class="line">    <span class="built_in">memcpy</span>(tensor_a-&gt;data, matrix_A, <span class="built_in">ggml_nbytes</span>(tensor_a));</span><br><span class="line">    <span class="built_in">memcpy</span>(tensor_b-&gt;data, matrix_B, <span class="built_in">ggml_nbytes</span>(tensor_b));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 3. Create a `ggml_cgraph` for mul_mat operation</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">ggml_cgraph</span> * gf = <span class="built_in">ggml_new_graph</span>(ctx);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// result = a*b^T</span></span><br><span class="line">    <span class="comment">// Pay attention: ggml_mul_mat(A, B) ==&gt; B will be transposed internally</span></span><br><span class="line">    <span class="comment">// the result is transposed</span></span><br><span class="line">    <span class="comment">// 4. 构建计算图 【此时并没有真正开始计算】</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">ggml_tensor</span> * result = <span class="built_in">ggml_mul_mat</span>(ctx, tensor_a, tensor_b);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Mark the &quot;result&quot; tensor to be computed</span></span><br><span class="line">    <span class="comment">// 5. 将计算图变量gf与要得到的向量result绑定，根据之前已经构建的计算图，在实际计算时自然会知道要算什么，并可以合理进行计算的调度。</span></span><br><span class="line">    <span class="built_in">ggml_build_forward_expand</span>(gf, result);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 6. Run the computation</span></span><br><span class="line">    <span class="type">int</span> n_threads = <span class="number">1</span>; <span class="comment">// Optional: number of threads to perform some operations with multi-threading</span></span><br><span class="line">    <span class="built_in">ggml_graph_compute_with_ctx</span>(ctx, gf, n_threads);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Retrieve results (output tensors)</span></span><br><span class="line">    <span class="type">float</span> * result_data = (<span class="type">float</span> *) result-&gt;data;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;mul mat (%d x %d) (transposed result):\n[&quot;</span>, (<span class="type">int</span>) result-&gt;ne[<span class="number">0</span>], (<span class="type">int</span>) result-&gt;ne[<span class="number">1</span>]);</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; result-&gt;ne[<span class="number">1</span>]<span class="comment">/* rows */</span>; j++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (j &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; result-&gt;ne[<span class="number">0</span>]<span class="comment">/* cols */</span>; i++) &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot; %.2f&quot;</span>, result_data[j * result-&gt;ne[<span class="number">0</span>] + i]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot; ]\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 7. Free memory and exit</span></span><br><span class="line">    <span class="built_in">ggml_free</span>(ctx);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-        
-          <p class="article-more-link">
-            <a href="/2024/11/21/ggml%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/#more">Read More</a>
-          </p>
-        
+<span id="more"></span>
       
     </div>
     <footer class="article-footer">
@@ -131,62 +129,19 @@
     </footer>
   </div>
   
-</article>
-
-
-
+    
+<nav id="article-nav">
   
-    <article id="post-hello-world" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/11/21/hello-world/" class="article-date">
-  <time class="dt-published" datetime="2024-11-21T11:15:49.689Z" itemprop="datePublished">2024-11-21</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/11/21/hello-world/">Hello World</a>
-    </h1>
+    <a href="/2024/11/21/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Hello World</div>
+    </a>
   
+</nav>
 
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/11/21/hello-world/" data-id="cm3r81o6p0000atu26yqu325i" data-title="Hello World" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-    </footer>
-  </div>
   
 </article>
-
-
-
-  
 
 
 </section>
