@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Unikernel组件之axalloc | Yumu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="在理解了Unikernel的基本启动流程之后，不难发现，并没有全局内存分配器，也就是说，虽然此时页表中有一段free_memory空间映射（所谓的堆空间），但没有一个管理这段虚拟内存的分配器，所以动态内存分配操作都是不支持的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Unikernel组件之axalloc">
+<meta property="og:url" content="http://example.com/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxalloc/index.html">
+<meta property="og:site_name" content="Yumu">
+<meta property="og:description" content="在理解了Unikernel的基本启动流程之后，不难发现，并没有全局内存分配器，也就是说，虽然此时页表中有一段free_memory空间映射（所谓的堆空间），但没有一个管理这段虚拟内存的分配器，所以动态内存分配操作都是不支持的。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2024/11/21/hello-world/axalloc/axalloc.png">
+<meta property="og:image" content="http://example.com/2024/11/21/hello-world/axalloc/%E9%A1%B5%E5%88%86%E9%85%8D%E5%99%A8%E5%92%8C%E5%AD%97%E8%8A%82%E5%88%86%E9%85%8D%E5%99%A8.png">
+<meta property="article:published_time" content="2024-11-25T06:56:56.000Z">
+<meta property="article:modified_time" content="2024-11-25T08:46:19.890Z">
+<meta property="article:author" content="Chen Xumin">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/11/21/hello-world/axalloc/axalloc.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Yumu" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Yumu</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Unikernel组件之axalloc" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxalloc/" class="article-date">
+  <time class="dt-published" datetime="2024-11-25T06:56:56.000Z" itemprop="datePublished">2024-11-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Unikernel组件之axalloc
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>在理解了Unikernel的基本启动流程之后，不难发现，并没有全局内存分配器，也就是说，虽然此时页表中有一段free_memory空间映射（所谓的堆空间），但没有一个管理这段虚拟内存的分配器，所以动态内存分配操作都是不支持的。</p>
+<span id="more"></span>
+
+<h1 id="axalloc-是什么"><a href="#axalloc-是什么" class="headerlink" title="axalloc 是什么"></a>axalloc 是什么</h1><p>axalloc就是要提供这样一个全局内存分配器，来管理这段虚拟地址空间，以支持标准库和内核自身对于动态内存分配的需要。注意，不是管理对应的物理内存。物理内存分配，应该是访问了某个未形成映射的虚拟地址后，产生缺页中断，再由额外的PMM（物理内存管理器）来支持的，这个可能是一个硬件支持。</p>
+<p>但是实际上，此时实现的虚拟地址和物理地址的映射就是一个固定的偏移，无论是一开始的巨页映射，还是后面实现的paging组件实现，都是直接把这个固定映射早早地形成在页表里了，虚拟地址和物理地址就是一一对应的了，这个虚拟地址空间和真实地址空间一样大，没有什么动态映射可言，那在这个角度看，这里的axalloc其实也管理着物理内存（不需要一个额外的物理内存管理器了）</p>
+<h1 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h1><p><img src="/2024/11/21/hello-world/axalloc/axalloc.png" alt="alt text"><br>要想使用RUST标准库Collection（与架构无关），就要有一个实现GlobalAlloc trait的类的全局静态对象，并把它通过<code>#[global_allocator]</code>来注册为默认全局分配器。</p>
+<p>主要就是要实现如下两个函数，支持按字节粒度分配一段连续且空闲的虚拟地址并支持回收。Layout指出大小和对齐要求。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">unsafe</span> <span class="keyword">fn</span> <span class="title function_">alloc</span>(&amp;<span class="keyword">self</span>, layout: Layout) <span class="punctuation">-&gt;</span> *<span class="keyword">mut</span> <span class="type">u8</span>;</span><br><span class="line"><span class="keyword">unsafe</span> <span class="keyword">fn</span> <span class="title function_">dealloc</span>(&amp;<span class="keyword">self</span>, ptr: *<span class="keyword">mut</span> <span class="type">u8</span>, layout: Layout);</span><br></pre></td></tr></table></figure>
+
+<p>但底层的分配器肯定是按页的，因为使用了页表，所以除了字节分配器byteAllocator，还要有pageAllocator，且实际上，byteAllocator也是基于pageAllocator做的，关系如下：<br><img src="/2024/11/21/hello-world/axalloc/%E9%A1%B5%E5%88%86%E9%85%8D%E5%99%A8%E5%92%8C%E5%AD%97%E8%8A%82%E5%88%86%E9%85%8D%E5%99%A8.png" alt="alt text"><br>此处的全部内存其实指的就是【物理内存中_ekernel标识往上的那一部分物理地址做了偏移映射之后的一段虚拟地址空间】，大概只有128M，不像真实的虚拟地址空间那么大那么灵活，实现方式很朴素，但确实可以实现功能。</p>
+<p>综上，设计了GlobalAllocator，其实现了GlobalAlloc trait，并实例化了唯一的一个全局静态对象GLOBAL_ALLCATOR，并提供接口供内核使用。</p>
+<p>byteAllcator和pageAllocator都可以配置各种各样的实际分配策略，此处不做详述。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxalloc/" data-id="cm3wsgb6j00004eu25ygbec8d" data-title="Unikernel组件之axalloc" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Bpaging/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Unikernel组件之paging
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2024/11/25/Unikernel%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Unikernel的基本启动流程</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/11/">November 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Bpaging/">Unikernel组件之paging</a>
+          </li>
+        
+          <li>
+            <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxalloc/">Unikernel组件之axalloc</a>
+          </li>
+        
+          <li>
+            <a href="/2024/11/25/Unikernel%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/">Unikernel的基本启动流程</a>
+          </li>
+        
+          <li>
+            <a href="/2024/11/21/ggml%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/">ggml入门学习总结</a>
+          </li>
+        
+          <li>
+            <a href="/2024/11/21/hello-world/">Hello World</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 Chen Xumin<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

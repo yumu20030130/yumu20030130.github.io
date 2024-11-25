@@ -69,6 +69,92 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Unikernel组件之paging" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Bpaging/" class="article-date">
+  <time class="dt-published" datetime="2024-11-25T07:57:16.000Z" itemprop="datePublished">2024-11-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Bpaging/">Unikernel组件之paging</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>在理解了Unikernel的基本启动流程之后，不难发现，其中并没有对MMIO相关的区域做映射，且映射的粒度也很粗，即要实现重建映射。</p>
+        
+          <p class="article-more-link">
+            <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Bpaging/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Bpaging/" data-id="cm3wsgb6t00014eu226l32gs7" data-title="Unikernel组件之paging" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-Unikernel组件之axalloc" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxalloc/" class="article-date">
+  <time class="dt-published" datetime="2024-11-25T06:56:56.000Z" itemprop="datePublished">2024-11-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxalloc/">Unikernel组件之axalloc</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>在理解了Unikernel的基本启动流程之后，不难发现，并没有全局内存分配器，也就是说，虽然此时页表中有一段free_memory空间映射（所谓的堆空间），但没有一个管理这段虚拟内存的分配器，所以动态内存分配操作都是不支持的。</p>
+        
+          <p class="article-more-link">
+            <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxalloc/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxalloc/" data-id="cm3wsgb6j00004eu25ygbec8d" data-title="Unikernel组件之axalloc" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-Unikernel的基本启动流程" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/11/25/Unikernel%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/" class="article-date">
@@ -243,6 +329,14 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Bpaging/">Unikernel组件之paging</a>
+          </li>
+        
+          <li>
+            <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxalloc/">Unikernel组件之axalloc</a>
+          </li>
         
           <li>
             <a href="/2024/11/25/Unikernel%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/">Unikernel的基本启动流程</a>
