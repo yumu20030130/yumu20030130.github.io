@@ -13,12 +13,12 @@
 <meta property="og:site_name" content="Yumu">
 <meta property="og:description" content="本文基于ArceOS简化版的代码（依靠riscv64_qemu架构），介绍一个简单的组件化的Unikernel的启动流程。仓库链接：https:&#x2F;&#x2F;github.com&#x2F;arceos-org&#x2F;oscamp.git Unikernel应用与内核：  处于相同的特权级-内核态 共享同一个地址空间 编译形成一个Image，一体运行  Unikernel可以看作是操作系统内核的基础，基于此，可以发展出更常">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://example.com/Unikernel%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/%E7%BB%84%E4%BB%B6%E5%8C%96.png">
+<meta property="og:image" content="http://example.com/2024/11/21/hello-world/%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/%E7%BB%84%E4%BB%B6%E5%8C%96.png">
 <meta property="article:published_time" content="2024-11-25T01:19:52.000Z">
-<meta property="article:modified_time" content="2024-11-25T04:25:10.977Z">
+<meta property="article:modified_time" content="2024-11-25T04:26:53.017Z">
 <meta property="article:author" content="Chen Xumin">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/Unikernel%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/%E7%BB%84%E4%BB%B6%E5%8C%96.png">
+<meta name="twitter:image" content="http://example.com/2024/11/21/hello-world/%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/%E7%BB%84%E4%BB%B6%E5%8C%96.png">
   
     <link rel="alternate" href="/atom.xml" title="Yumu" type="application/atom+xml">
   
@@ -105,7 +105,7 @@
 <p>Unikernel可以看作是操作系统内核的基础，基于此，可以发展出更常见的宏内核</p>
 <span id="more"></span>
 
-<h1 id="组件化"><a href="#组件化" class="headerlink" title="组件化"></a>组件化</h1><p>将内核按功能划分为多个模块，最基本内核只包含基础模块，其余模块按需配置：<br><img src="/Unikernel%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/%E7%BB%84%E4%BB%B6%E5%8C%96.png" alt="alt text"></p>
+<h1 id="组件化"><a href="#组件化" class="headerlink" title="组件化"></a>组件化</h1><p>将内核按功能划分为多个模块，最基本内核只包含基础模块，其余模块按需配置：<br><img src="/2024/11/21/hello-world/%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/%E7%BB%84%E4%BB%B6%E5%8C%96.png" alt="alt text"></p>
 <h1 id="启动流程"><a href="#启动流程" class="headerlink" title="启动流程"></a>启动流程</h1><h2 id="BIOS启动"><a href="#BIOS启动" class="headerlink" title="BIOS启动"></a>BIOS启动</h2><p>硬件会把BIOS固件程序放到物理地址为0x0的地方，并开始执行，对硬件进行一些初始化，然后加载BootLoader（操作系统引导程序的加载者）到0x8000_0000物理地址，并开始执行。此处用的是OpenSBI v1.0 。</p>
 <p>其他架构会有其他的BootLoader。</p>
 <h2 id="SBI启动"><a href="#SBI启动" class="headerlink" title="SBI启动"></a>SBI启动</h2><p>SBI即为 （<strong>RISC-V</strong> Supervisor Binary Interface），SBI直接运行在系统M模式，可以作为一个bootloader也可以是一个M模式下运行的后台程序，SBI程序拥有最高的权限，可以访问所有的硬件资源，向S-MODE的OS提供了统一的硬件功能调用接口（在此处，就是给axhal提供一些打印、时钟等的支持）。<br>在本处代码中，SBI作为bootloader时，最后加载对应的内核执行文件到起始物理地址为0x8020_0000的内存中。</p>
