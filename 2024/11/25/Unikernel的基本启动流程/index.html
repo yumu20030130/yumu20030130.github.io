@@ -15,7 +15,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://example.com/2024/11/21/hello-world/%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/%E7%BB%84%E4%BB%B6%E5%8C%96.png">
 <meta property="article:published_time" content="2024-11-25T01:19:52.000Z">
-<meta property="article:modified_time" content="2024-11-25T08:37:20.241Z">
+<meta property="article:modified_time" content="2024-11-25T08:54:35.250Z">
 <meta property="article:author" content="Chen Xumin">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://example.com/2024/11/21/hello-world/%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/%E7%BB%84%E4%BB%B6%E5%8C%96.png">
@@ -123,7 +123,7 @@
 </li>
 <li><p>建立栈<br>栈空间已经分配完成（在链接时），把栈顶指针sp设置完成，就算是建立了栈，注意，此处的栈是高地址往低地址增长。函数的调用依赖于栈的有效设置，所以为了尽早可以正常使用函数，而不是像_start这样自己写汇编，就要尽早建立栈。</p>
 </li>
-<li><p>建立页表并启用MMU（内存管理单元）<br>页表空间也已分配完成，此处先对一个G的物理空间形成了恒等映射和“偏移映射”，偏移映射是给应用和全局内存分配器用的，恒等映射应该是给一些更底层的模块用的（保留一个直接访问物理内存的形式）。这个页表非常的粗粒度，而且根据下面的实际所有物理段的显示，此处显然只形成了非mmio的映射，所以此时并不支持一些外部设备。<br>值得注意的是，这里的映射是<strong>巨页映射</strong>，即直接在根页表中给出了1G的页映射。MMU在解析巨页映射时，直接就会计算出对应虚拟地址的物理地址，无需正常查三级页表。<br><em>巨页映射则这个项就是页表项，RWX至少有一位为1，如果指向的是一级子页表，RWX应该全为0</em><br>而所谓的启动mmu，其实就是给satp寄存器设置值，把页表的模式和页表地址告诉它，此后的地址访问，就会默认为虚拟地址，然后经过MMU映射后再得到物理地址（不设置satp就是默认直接访问）。</p>
+<li><p>建立页表并启用MMU（内存管理单元）<br>页表空间也已分配完成，此处先对一个G的物理空间形成了恒等映射和“偏移映射”，偏移映射是给应用和全局内存分配器用的，恒等映射应该是给一些更底层的模块用的（保留一个直接访问物理内存的形式）。这个页表非常的粗粒度，而且根据下面的实际所有物理段的显示，此处显然只形成了非mmio的映射，所以此时并不支持一些外部设备。<br>值得注意的是，这里的映射是<strong>巨页映射</strong>，即直接在根页表中给出了1G的页映射，这是避免在初始化时加载过多的页表，简化系统启动。MMU在解析巨页映射时，直接就会计算出对应虚拟地址的物理地址，无需正常查三级页表。<br><em>巨页映射则这个项就是页表项，RWX至少有一位为1，如果指向的是一级子页表，RWX应该全为0</em><br>而所谓的启动mmu，其实就是给satp寄存器设置值，把页表的模式和页表地址告诉它，此后的地址访问，就会默认为虚拟地址，然后经过MMU映射后再得到物理地址（不设置satp就是默认直接访问）。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[PA:0x80200000, PA:0x80206000) .text (READ | EXECUTE | RESERVED)</span><br><span class="line">[PA:0x80206000, PA:0x80209000) .rodata (READ | RESERVED)</span><br><span class="line">[PA:0x80209000, PA:0x8020c000) .data .tdata .tbss .percpu (READ | WRITE | RESERVED)</span><br><span class="line">[PA:0x8020c000, PA:0x8024c000) boot stack (READ | WRITE | RESERVED)</span><br><span class="line">[PA:0x8024c000, PA:0x80270000) .bss (READ | WRITE | RESERVED)</span><br><span class="line">[PA:0x80270000, PA:0x88000000) free memory (READ | WRITE | FREE)</span><br><span class="line">[PA:0x101000, PA:0x102000) mmio (READ | WRITE | DEVICE | RESERVED)</span><br><span class="line">[PA:0xc000000, PA:0xc210000) mmio (READ | WRITE | DEVICE | RESERVED)</span><br><span class="line">[PA:0x10000000, PA:0x10001000) mmio (READ | WRITE | DEVICE | RESERVED)[PA:0x10001000, PA:0x10009000) mmio (READ | WRITE | DEVICE | RESERVED)</span><br><span class="line">[PA:0x22000000, PA:0x24000000) mmio (READ | WRITE | DEVICE | RESERVED)</span><br><span class="line">[PA:0x30000000, PA:0x40000000) mmio (READ | WRITE | DEVICE | RESERVED)</span><br><span class="line">[PA:0x40000000, PA:0x80000000) mmio (READ | WRITE | DEVICE | RESERVED)</span><br></pre></td></tr></table></figure></li>
 <li><p>修正sp寄存器<br>访问sp寄存器的值，应该是虚拟地址，所以要加一个偏移进行修正</p>
 </li>
