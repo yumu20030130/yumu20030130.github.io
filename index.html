@@ -69,6 +69,50 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Debug-OpenSBI版本错误" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/11/30/Debug-OpenSBI%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/" class="article-date">
+  <time class="dt-published" datetime="2024-11-30T09:06:13.000Z" itemprop="datePublished">2024-11-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/11/30/Debug-OpenSBI%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/">Debug-OpenSBI版本错误</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>碎碎念流水账一篇……<br>代码链接：<a target="_blank" rel="noopener" href="https://github.com/arceos-org/oscamp/tree/main/arceos">https://github.com/arceos-org/oscamp/tree/main/arceos</a></p>
+<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>运行tour&#x2F;h_1_0，在虚拟化准备阶段就报非法指令错误。</p>
+        
+          <p class="article-more-link">
+            <a href="/2024/11/30/Debug-OpenSBI%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/11/30/Debug-OpenSBI%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/" data-id="cm43z7dfs000047u24d361bdk" data-title="Debug-OpenSBI版本错误" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-最简宏内核模式内核构建" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/11/30/%E6%9C%80%E7%AE%80%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%86%85%E6%A0%B8%E6%9E%84%E5%BB%BA/" class="article-date">
@@ -93,59 +137,11 @@
       
         <h1 id="宏内核-Monolithic-Kernel"><a href="#宏内核-Monolithic-Kernel" class="headerlink" title="宏内核 Monolithic Kernel"></a>宏内核 Monolithic Kernel</h1><h2 id="宏内核-vs-Unikernel"><a href="#宏内核-vs-Unikernel" class="headerlink" title="宏内核 vs Unikernel"></a>宏内核 vs Unikernel</h2><p><img src="/2024/11/21/hello-world/%E5%AE%8F%E5%86%85%E6%A0%B8%E4%B8%8EUnikernel%E6%AF%94%E8%BE%83.png" alt="alt text"></p>
 <h2 id="从Unikernel到宏内核"><a href="#从Unikernel到宏内核" class="headerlink" title="从Unikernel到宏内核"></a>从Unikernel到宏内核</h2><p><img src="/2024/11/21/hello-world/Unikernel%E5%88%B0%E5%AE%8F%E5%86%85%E6%A0%B8.png" alt="alt text"></p>
-<h1 id="宏内核模式下运行用户程序"><a href="#宏内核模式下运行用户程序" class="headerlink" title="宏内核模式下运行用户程序"></a>宏内核模式下运行用户程序</h1><p>和之前Unikernel类似的，经过一系列引导，内核构建起来了，开始执行main函数。不同的是，Unikernel中，main函数直接就是运行在内核态的一个应用程序，没有用户态的说法；而现在在宏内核中，这个main函数是一个内核态的“应用准备程序”，它会为对应的应用准备资源，随后基于spawn流程创建一个应用进程，并进入用户态执行该应用。</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="comment">// A new address space for user app. </span></span><br><span class="line">    <span class="comment">// 把高端处的内核空间映射出来</span></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">uspace</span> = axmm::<span class="title function_ invoke__">new_user_aspace</span>().<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Load user app binary file into address space. </span></span><br><span class="line">    <span class="comment">// 把对应的img/bin文件（就是直接一堆指令和数据）放到以APP_ENTRY为起始虚拟地址的地方</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> <span class="variable">Err</span>(e) = <span class="title function_ invoke__">load_user_app</span>(<span class="string">&quot;/sbin/origin&quot;</span>, &amp;<span class="keyword">mut</span> uspace) &#123;</span><br><span class="line">        <span class="built_in">panic!</span>(<span class="string">&quot;Cannot load app! &#123;:?&#125;&quot;</span>, e);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Init user stack.</span></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">ustack_top</span> = <span class="title function_ invoke__">init_user_stack</span>(&amp;<span class="keyword">mut</span> uspace, <span class="literal">true</span>).<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">    ax_println!(<span class="string">&quot;New user address space: &#123;:#x?&#125;&quot;</span>, uspace);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Let&#x27;s kick off the user process.</span></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">user_task</span> = task::<span class="title function_ invoke__">spawn_user_task</span>(</span><br><span class="line">        Arc::<span class="title function_ invoke__">new</span>(Mutex::<span class="title function_ invoke__">new</span>(uspace)),</span><br><span class="line">        <span class="comment">// 用户空间上下文 目前主要保存指令指针和栈指针和sstatus</span></span><br><span class="line">        <span class="comment">// TrapFrame</span></span><br><span class="line">        UspaceContext::<span class="title function_ invoke__">new</span>(APP_ENTRY.<span class="title function_ invoke__">into</span>(), ustack_top),</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Wait for user process to exit ...</span></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">exit_code</span> = user_task.<span class="title function_ invoke__">join</span>();</span><br><span class="line">    ax_println!(<span class="string">&quot;monolithic kernel exit [&#123;:?&#125;] normally!&quot;</span>, exit_code);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="资源准备"><a href="#资源准备" class="headerlink" title="资源准备"></a>资源准备</h2><p>具体而言：</p>
-<ol>
-<li>为应用创建单独的地址空间和页表（页表涵盖的范围大于等于可见范围，areas中的地址范围也不一定在可见范围中）。并将内核地址空间的映射复制到该空间<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">AddrSpace</span> &#123;</span><br><span class="line">    va_range: VirtAddrRange,  <span class="comment">// 可见范围 [0, 0x40_0000_0000]</span></span><br><span class="line">    areas: MemorySet&lt;Backend&gt;, <span class="comment">// 多个已alloc的虚拟地址段</span></span><br><span class="line">    pt: PageTable,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<img src="/2024/11/21/hello-world/%E7%94%A8%E6%88%B7%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4.png" alt="alt text"></li>
-<li>分配APP_ENTRY为起始虚拟地址的一页，加载app的bin文件。</li>
-</ol>
-<ul>
-<li>分配就是基于global_allocator</li>
-<li>注意此时仍是基于内核页表，所以要访问对应的物理页，注意先转换为基于内核页表的虚拟地址</li>
-</ul>
-<ol start="3">
-<li><p>分配用户地址空间可见部分的最高的一段地址，作为用户栈</p>
-</li>
-<li><p>传入地址空间和用户上下文（创建一个进程的必要资源）给spawn_user_task</p>
-</li>
-</ol>
-<h2 id="进程设置"><a href="#进程设置" class="headerlink" title="进程设置"></a>进程设置</h2><p>对于各类内核模式，调度子系统机制是基本一致的，<br>调度仅关心Task中与调度相关的属性，而不关心资源属性。我们在从Unikernel模式扩展到其他模式的时候，只需要在原来调度系统的基础上，增加对资源的管控即可。<br>Unikernel模式下，资源都是全局的，Task几乎不包含资源属性；宏内核模式下，以进程为单位管理和隔离资源，Task表示真正意义上的进程，页表、栈等都独属于该Task，且执行调度时都是内核态，要想运行用户态程序，还要在运行前做特权模式转换。</p>
-<p>具体而言：</p>
-<ol>
-<li>在创建task时设置satp和task_ext成员</li>
-<li>单独设计一个闭包作为进程的入口函数，执行特权模式转换</li>
-<li>设置调度时上下文切换的前一步为页表切换 （搜索<code>#[cfg(feature = &quot;uspace&quot;)]</code>可发现该增量改动）</li>
-</ol>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">spawn_user_task</span>(aspace: Arc&lt;Mutex&lt;AddrSpace&gt;&gt;, uctx: UspaceContext) <span class="punctuation">-&gt;</span> AxTaskRef &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">task</span> = TaskInner::<span class="title function_ invoke__">new</span>(</span><br><span class="line">        <span class="comment">// 传入该进程的入口函数</span></span><br><span class="line">        || &#123;</span><br><span class="line">            <span class="keyword">let</span> <span class="variable">curr</span> = axtask::<span class="title function_ invoke__">current</span>();</span><br><span class="line">            <span class="keyword">let</span> <span class="variable">kstack_top</span> = curr.<span class="title function_ invoke__">kernel_stack_top</span>().<span class="title function_ invoke__">unwrap</span>();</span><br><span class="line">            ax_println!(</span><br><span class="line">                <span class="string">&quot;Enter user space: entry=&#123;:#x&#125;, ustack=&#123;:#x&#125;, kstack=&#123;:#x&#125;&quot;</span>,</span><br><span class="line">                curr.<span class="title function_ invoke__">task_ext</span>().uctx.<span class="title function_ invoke__">get_ip</span>(),</span><br><span class="line">                curr.<span class="title function_ invoke__">task_ext</span>().uctx.<span class="title function_ invoke__">get_sp</span>(),</span><br><span class="line">                kstack_top,</span><br><span class="line">            );</span><br><span class="line">            <span class="keyword">unsafe</span> &#123; curr.<span class="title function_ invoke__">task_ext</span>().uctx.<span class="title function_ invoke__">enter_uspace</span>(kstack_top) &#125;;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">&quot;userboot&quot;</span>.<span class="title function_ invoke__">into</span>(),</span><br><span class="line">        crate::KERNEL_STACK_SIZE,</span><br><span class="line">    );</span><br><span class="line">    <span class="comment">// 设置宏内核特有的资源</span></span><br><span class="line">    <span class="comment">// 设置该进程的用户页表（但还没启用）</span></span><br><span class="line">    task.<span class="title function_ invoke__">ctx_mut</span>()</span><br><span class="line">        .<span class="title function_ invoke__">set_page_table_root</span>(aspace.<span class="title function_ invoke__">lock</span>().<span class="title function_ invoke__">page_table_root</span>());</span><br><span class="line">    <span class="comment">// 设置进程的拓展属性（因宏内核模式而产生）</span></span><br><span class="line">    task.<span class="title function_ invoke__">init_task_ext</span>(TaskExt::<span class="title function_ invoke__">new</span>(uctx, aspace));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 正常调用原来的spawn函数</span></span><br><span class="line">    axtask::<span class="title function_ invoke__">spawn_task</span>(task)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="特权模式转换"><a href="#特权模式转换" class="headerlink" title="特权模式转换"></a>特权模式转换</h2><ol>
-<li>关中断</li>
-<li>设置spec</li>
-<li>保存一些上下文</li>
-<li>设置sstatus</li>
-<li>设置sp</li>
-<li>sret<br>sret原始用法起始是用于中断&#x2F;异常陷入s态后，返回中断&#x2F;异常前状态用的，硬件会根据sepc设置pc，根据sstatus决定要不要恢复中断、返回S态还是U态等。现在其实就是设置好这些寄存器的值，通过伪造一个中断结束来进入U态。<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// function of UspaceContext</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">unsafe</span> <span class="keyword">fn</span> <span class="title function_">enter_uspace</span>(&amp;<span class="keyword">self</span>, kstack_top: VirtAddr) <span class="punctuation">-&gt;</span> ! &#123;</span><br><span class="line">    <span class="keyword">use</span> riscv::register::&#123;sepc, sscratch&#125;;</span><br><span class="line"></span><br><span class="line">    super::<span class="title function_ invoke__">disable_irqs</span>();</span><br><span class="line">    sscratch::<span class="title function_ invoke__">write</span>(kstack_top.<span class="title function_ invoke__">as_usize</span>());</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 写入用户态的sepc，即之前设置的entry</span></span><br><span class="line">    sepc::<span class="title function_ invoke__">write</span>(<span class="keyword">self</span>.<span class="number">0</span>.sepc);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 把当前的寄存器值写入内核栈，加载UspaceContext</span></span><br><span class="line">    <span class="comment">// Address of the top of the kernel stack after saving the trap frame.</span></span><br><span class="line">    <span class="keyword">let</span> <span class="variable">kernel_trap_addr</span> = kstack_top.<span class="title function_ invoke__">as_usize</span>() - core::mem::size_of::&lt;TrapFrame&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 此时的sp其实就是kstack_top，即内核栈的顶部，前面已经设置了sscratch，所以可以直接覆盖</span></span><br><span class="line">    asm!(<span class="string">&quot;</span></span><br><span class="line"><span class="string">        mv      sp, &#123;tf&#125; </span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        STR     gp, &#123;kernel_trap_addr&#125;, 2</span></span><br><span class="line"><span class="string">        LDR     gp, sp, 2</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        STR     tp, &#123;kernel_trap_addr&#125;, 3</span></span><br><span class="line"><span class="string">        LDR     tp, sp, 3</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        LDR     t0, sp, 32</span></span><br><span class="line"><span class="string">        csrw    sstatus, t0</span></span><br><span class="line"><span class="string">        POP_GENERAL_REGS</span></span><br><span class="line"><span class="string">        LDR     sp, sp, 1</span></span><br><span class="line"><span class="string">        sret&quot;</span>,</span><br><span class="line">        tf = <span class="title function_ invoke__">in</span>(reg) &amp;(<span class="keyword">self</span>.<span class="number">0</span>),</span><br><span class="line">        kernel_trap_addr = <span class="title function_ invoke__">in</span>(reg) kernel_trap_addr,</span><br><span class="line">        <span class="title function_ invoke__">options</span>(noreturn),</span><br><span class="line">    )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h1 id="宏内核模式下支持用户程序trap"><a href="#宏内核模式下支持用户程序trap" class="headerlink" title="宏内核模式下支持用户程序trap"></a>宏内核模式下支持用户程序trap</h1><p>在用户程序程序中，一种主动触发trap的方式就是ecall环境调用：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">unsafe</span> <span class="keyword">extern</span> <span class="string">&quot;C&quot;</span> <span class="keyword">fn</span> <span class="title function_">_start</span>() <span class="punctuation">-&gt;</span> ! &#123;</span><br><span class="line">    core::arch::asm!(</span><br><span class="line">        <span class="string">&quot;addi sp, sp, -4&quot;</span>,</span><br><span class="line">        <span class="string">&quot;sw a0, (sp)&quot;</span>,</span><br><span class="line">        <span class="string">&quot;li a7, 93&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ecall&quot;</span>,</span><br><span class="line">        <span class="title function_ invoke__">options</span>(noreturn)</span><br><span class="line">    )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>当执行一个trap时，除了 timer interrupt，所有的过程都是相同的，硬件会自动完成下述过程：</p>
-<ol>
-<li>如果该 trap 是一个设备中断并且 sstatus 的 SIE bit 为 0，那么不再执行下述过程</li>
-<li>通过置零 SIE 禁用中断</li>
-<li>将 pc 拷贝到 sepc</li>
-<li>保存当前的特权级到 sstatus 的 SPP 字段</li>
-<li>将 scause 设置成 trap 的原因</li>
-<li>设置当前特权级为 supervisor</li>
-<li>拷贝 stvec（中断服务程序的首地址）到 pc</li>
-<li>开始执行中断服务程序<br>（不会自动切换到内核栈，也不会自动切换页表）<br>详见：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/harrypotterjackson/p/17548837.html#_label1">https://www.cnblogs.com/harrypotterjackson/p/17548837.html#_label1</a></li>
-</ol>
-<p>这些s开头的寄存器，我们称之为CSR（控制与状态寄存器），主要用于trap处理。</p>
-<p>通过查看代码中对stvec的设置和对应的汇编代码，可以发现就对应了riscv_trap_hanlder函数。其中E::UserEnvCall对应的便是ecall产生的调用，此处注意执行完后要把sepc寄存器后移一个命令执行，防止死循环。如果就是要重新执行触发trap的命令，那就不用加。</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">riscv_trap_handler</span>(tf: &amp;<span class="keyword">mut</span> TrapFrame, from_user: <span class="type">bool</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">scause</span> = scause::<span class="title function_ invoke__">read</span>();</span><br><span class="line">    <span class="keyword">match</span> scause.<span class="title function_ invoke__">cause</span>() &#123;</span><br><span class="line">        <span class="meta">#[cfg(feature = <span class="string">&quot;uspace&quot;</span>)]</span></span><br><span class="line">        Trap::<span class="title function_ invoke__">Exception</span>(E::UserEnvCall) =&gt; &#123;</span><br><span class="line">            tf.regs.a0 = crate::trap::<span class="title function_ invoke__">handle_syscall</span>(tf, tf.regs.a7) <span class="keyword">as</span> <span class="type">usize</span>;</span><br><span class="line">            tf.sepc += <span class="number">4</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        Trap::<span class="title function_ invoke__">Exception</span>(E::LoadPageFault) =&gt; <span class="title function_ invoke__">handle_page_fault</span>(tf, MappingFlags::READ, from_user),</span><br><span class="line">        Trap::<span class="title function_ invoke__">Exception</span>(E::StorePageFault) =&gt; <span class="title function_ invoke__">handle_page_fault</span>(tf, MappingFlags::WRITE, from_user),</span><br><span class="line">        Trap::<span class="title function_ invoke__">Exception</span>(E::InstructionPageFault) =&gt; &#123;</span><br><span class="line">            <span class="title function_ invoke__">handle_page_fault</span>(tf, MappingFlags::EXECUTE, from_user)</span><br><span class="line">        &#125;</span><br><span class="line">        Trap::<span class="title function_ invoke__">Exception</span>(E::Breakpoint) =&gt; <span class="title function_ invoke__">handle_breakpoint</span>(&amp;<span class="keyword">mut</span> tf.sepc),</span><br><span class="line">        Trap::<span class="title function_ invoke__">Interrupt</span>(_) =&gt; &#123;</span><br><span class="line">            handle_trap!(IRQ, scause.<span class="title function_ invoke__">bits</span>());</span><br><span class="line">        &#125;</span><br><span class="line">        _ =&gt; &#123;</span><br><span class="line">            <span class="built_in">panic!</span>(</span><br><span class="line">                <span class="string">&quot;Unhandled trap &#123;:?&#125; @ &#123;:#x&#125;:\n&#123;:#x?&#125;&quot;</span>,</span><br><span class="line">                scause.<span class="title function_ invoke__">cause</span>(),</span><br><span class="line">                tf.sepc,</span><br><span class="line">                tf</span><br><span class="line">            );</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h1 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h1><p>不难发现，在引入了用户态之后，进程调度时的过程就变成了：用户态trap进内核态，内核态调度到另外一个进程，sret变回用户态。但是一些细节问题还不太清楚，比如栈指针的转换流程。待后续研究。</p>
-
+        
+          <p class="article-more-link">
+            <a href="/2024/11/30/%E6%9C%80%E7%AE%80%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%86%85%E6%A0%B8%E6%9E%84%E5%BB%BA/#more">Read More</a>
+          </p>
+        
       
     </div>
     <footer class="article-footer">
@@ -466,6 +462,10 @@
       <ul>
         
           <li>
+            <a href="/2024/11/30/Debug-OpenSBI%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/">Debug-OpenSBI版本错误</a>
+          </li>
+        
+          <li>
             <a href="/2024/11/30/%E6%9C%80%E7%AE%80%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%86%85%E6%A0%B8%E6%9E%84%E5%BB%BA/">最简宏内核模式内核构建</a>
           </li>
         
@@ -479,10 +479,6 @@
         
           <li>
             <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxalloc/">Unikernel组件之axalloc</a>
-          </li>
-        
-          <li>
-            <a href="/2024/11/25/Unikernel%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/">Unikernel的基本启动流程</a>
           </li>
         
       </ul>

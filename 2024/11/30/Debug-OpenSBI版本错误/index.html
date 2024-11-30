@@ -4,21 +4,21 @@
   <meta charset="utf-8">
   
   
-  <title>Unikernel组件之paging | Yumu</title>
+  <title>Debug-OpenSBI版本错误 | Yumu</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="在理解了Unikernel的基本启动流程之后，不难发现，其中并没有对MMIO相关的区域做映射，且映射的粒度也很粗，即要实现重建映射。">
+  <meta name="description" content="碎碎念流水账一篇……代码链接：https:&#x2F;&#x2F;github.com&#x2F;arceos-org&#x2F;oscamp&#x2F;tree&#x2F;main&#x2F;arceos 问题运行tour&#x2F;h_1_0，在虚拟化准备阶段就报非法指令错误。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Unikernel组件之paging">
-<meta property="og:url" content="http://example.com/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Bpaging/index.html">
+<meta property="og:title" content="Debug-OpenSBI版本错误">
+<meta property="og:url" content="http://example.com/2024/11/30/Debug-OpenSBI%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/index.html">
 <meta property="og:site_name" content="Yumu">
-<meta property="og:description" content="在理解了Unikernel的基本启动流程之后，不难发现，其中并没有对MMIO相关的区域做映射，且映射的粒度也很粗，即要实现重建映射。">
+<meta property="og:description" content="碎碎念流水账一篇……代码链接：https:&#x2F;&#x2F;github.com&#x2F;arceos-org&#x2F;oscamp&#x2F;tree&#x2F;main&#x2F;arceos 问题运行tour&#x2F;h_1_0，在虚拟化准备阶段就报非法指令错误。">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://example.com/2024/11/21/hello-world/paging/%E9%87%8D%E5%BB%BA%E6%98%A0%E5%B0%84.png">
-<meta property="article:published_time" content="2024-11-25T07:57:16.000Z">
-<meta property="article:modified_time" content="2024-11-25T08:50:52.670Z">
+<meta property="og:image" content="http://example.com/2024/11/21/hello-world/I%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/qemu%E7%89%88%E6%9C%AC.png">
+<meta property="article:published_time" content="2024-11-30T09:06:13.000Z">
+<meta property="article:modified_time" content="2024-11-30T09:34:20.110Z">
 <meta property="article:author" content="Chen Xumin">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2024/11/21/hello-world/paging/%E9%87%8D%E5%BB%BA%E6%98%A0%E5%B0%84.png">
+<meta name="twitter:image" content="http://example.com/2024/11/21/hello-world/I%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/qemu%E7%89%88%E6%9C%AC.png">
   
     <link rel="alternate" href="/atom.xml" title="Yumu" type="application/atom+xml">
   
@@ -73,10 +73,10 @@
 </header>
 
       <div class="outer">
-        <section id="main"><article id="post-Unikernel组件之paging" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+        <section id="main"><article id="post-Debug-OpenSBI版本错误" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Bpaging/" class="article-date">
-  <time class="dt-published" datetime="2024-11-25T07:57:16.000Z" itemprop="datePublished">2024-11-25</time>
+    <a href="/2024/11/30/Debug-OpenSBI%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/" class="article-date">
+  <time class="dt-published" datetime="2024-11-30T09:06:13.000Z" itemprop="datePublished">2024-11-30</time>
 </a>
     
   </div>
@@ -87,7 +87,7 @@
         
   
     <h1 class="p-name article-title" itemprop="headline name">
-      Unikernel组件之paging
+      Debug-OpenSBI版本错误
     </h1>
   
 
@@ -95,22 +95,31 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <p>在理解了Unikernel的基本启动流程之后，不难发现，其中并没有对MMIO相关的区域做映射，且映射的粒度也很粗，即要实现重建映射。</p>
+        <p>碎碎念流水账一篇……<br>代码链接：<a target="_blank" rel="noopener" href="https://github.com/arceos-org/oscamp/tree/main/arceos">https://github.com/arceos-org/oscamp/tree/main/arceos</a></p>
+<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>运行tour&#x2F;h_1_0，在虚拟化准备阶段就报非法指令错误。</p>
 <span id="more"></span>
 
-<p><img src="/2024/11/21/hello-world/paging/%E9%87%8D%E5%BB%BA%E6%98%A0%E5%B0%84.png" alt="alt text"><br>流程大致如下：</p>
-<ol>
-<li><strong>依赖axalloc</strong>，重新分配一页做根页表</li>
-<li>根据elf中标记的各个段的flag，合理地设置各个段的页表项在页表中的可读可写性等，且此时不做巨页映射了，都是4K的小页映射，但还是一对一的固定偏移静态映射，一开始就写好在页表里了。</li>
-<li>SBI不做映射，这是为了安全性考虑，用户本来也不应该能直接访问SBI，然后这段虚拟地址空间可以被重新利用。</li>
-<li>映射MMIO设备</li>
-<li>更改satp寄存器，换为新根页表的物理地址</li>
+<h1 id="排查流程"><a href="#排查流程" class="headerlink" title="排查流程"></a>排查流程</h1><ol>
+<li><p>hypervisor需要硬件和sbi共同支持才能正常运作，查看平台日志，发现该OpenSBI只支持s态和u态，不支持hypervisor（没有h）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Boot HART ISA   : rv64imafdcsu</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看opensbi版本，发现为v0.9，上网查询发现v1.0及以上支持hypervisor</p>
+</li>
+<li><p>opensbi版本一般是跟随安装的qemu的，观察日志，使用了qemu-system-riscv64工具：<br><img src="/2024/11/21/hello-world/I%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/qemu%E7%89%88%E6%9C%AC.png" alt="alt text"><br>故查询qemu-system-riscv64版本，发现比之前安装的qemu 7.0.0版本要低</p>
+</li>
+<li><p>查看一开始安装qemu的方法，是安装包手动安装，应该比较稳定，不会被包管理器之类的更新，添加的PATH也还在，但是<code>which qemu-system-riscv64</code>却显示的是另一个路径下的该工具</p>
+</li>
+<li><p>结论：之前某次用包管理器批量安装工具的时候可能隐含了这个，导致系统中有多个qemu-system-riscv64，且qemu 7.0.0不是最优先的。</p>
+</li>
+<li><p>解决方案：<br>在.bashrc最后加一个export，直接把qemu-7.0.0的路径放到PATH变量的最前面。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> PATH=/root/qemu-7.0.0/build:<span class="variable">$PATH</span></span><br></pre></td></tr></table></figure></li>
 </ol>
+<p>唉…… 版本问题真是闹心</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Bpaging/" data-id="cm3wsgb6t00014eu226l32gs7" data-title="Unikernel组件之paging" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/11/30/Debug-OpenSBI%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/" data-id="cm43z7dfs000047u24d361bdk" data-title="Debug-OpenSBI版本错误" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -120,19 +129,10 @@
     
 <nav id="article-nav">
   
-    <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxtask/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          Unikernel组件之axtask
-        
-      </div>
-    </a>
   
-  
-    <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxalloc/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2024/11/30/%E6%9C%80%E7%AE%80%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%86%85%E6%A0%B8%E6%9E%84%E5%BB%BA/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">Unikernel组件之axalloc</div>
+      <div class="article-nav-title">最简宏内核模式内核构建</div>
     </a>
   
 </nav>
