@@ -15,7 +15,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://example.com/2024/11/21/hello-world/axtask/%E9%80%9A%E7%94%A8%E8%B0%83%E5%BA%A6%E6%A1%86%E6%9E%B6.png">
 <meta property="article:published_time" content="2024-11-25T12:39:50.000Z">
-<meta property="article:modified_time" content="2024-11-25T13:32:41.436Z">
+<meta property="article:modified_time" content="2024-11-29T06:52:16.397Z">
 <meta property="article:author" content="Chen Xumin">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://example.com/2024/11/21/hello-world/axtask/%E9%80%9A%E7%94%A8%E8%B0%83%E5%BA%A6%E6%A1%86%E6%9E%B6.png">
@@ -126,7 +126,8 @@
 <li>选出下一个任务</li>
 <li>上下文转换<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// oscamp/arceos/modules/axtask/src/run_queue.rs</span></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">resched</span>(&amp;<span class="keyword">mut</span> <span class="keyword">self</span>, preempt: <span class="type">bool</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">prev</span> = crate::<span class="title function_ invoke__">current</span>();</span><br><span class="line">    <span class="keyword">if</span> prev.<span class="title function_ invoke__">is_running</span>() &#123;</span><br><span class="line">        prev.<span class="title function_ invoke__">set_state</span>(TaskState::Ready);</span><br><span class="line">        <span class="keyword">if</span> !prev.<span class="title function_ invoke__">is_idle</span>() &#123;</span><br><span class="line">            <span class="keyword">self</span>.scheduler.<span class="title function_ invoke__">put_prev_task</span>(prev.<span class="title function_ invoke__">clone</span>(), preempt);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">next</span> = <span class="keyword">self</span>.scheduler.<span class="title function_ invoke__">pick_next_task</span>().<span class="title function_ invoke__">unwrap_or_else</span>(|| <span class="keyword">unsafe</span> &#123;</span><br><span class="line">        <span class="comment">// Safety: IRQs must be disabled at this time.</span></span><br><span class="line">        IDLE_TASK.<span class="title function_ invoke__">current_ref_raw</span>().<span class="title function_ invoke__">get_unchecked</span>().<span class="title function_ invoke__">clone</span>()</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">self</span>.<span class="title function_ invoke__">switch_to</span>(prev, next);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
 </ol>
-<h2 id="上下文转换"><a href="#上下文转换" class="headerlink" title="上下文转换"></a>上下文转换</h2><p>传入的分别是旧任务和新任务的TaskContext中的rsp变量的引用。</p>
+<h2 id="上下文转换"><a href="#上下文转换" class="headerlink" title="上下文转换"></a>上下文转换</h2><p>这个是与具体的指令架构相关的</p>
+<h3 id="x86"><a href="#x86" class="headerlink" title="x86"></a>x86</h3><p>传入的分别是旧任务和新任务的TaskContext中的rsp变量的引用。</p>
 <ol>
 <li>刚进入该函数时，实际上执行了<code>call context_switch</code>汇编指令, 这等价于将当前RIP指令寄存器中的值push到当前的栈中，即旧任务的栈中；</li>
 <li>保存当前寄存器到旧任务的栈中；</li>
@@ -138,7 +139,7 @@
 <p>由此，开始执行新任务，上下文转换。同时，也可以发现，当旧任务再次被调度时，会回到调用context_switch的“下一个语句”，经过层层回溯，离开调度模块，重新执行其应用代码。当然了，如果涉及应用和内核分离，可能又会有更复杂的流程，这个过程可能也没有这么“丝滑”了。</p>
 <p>这么看来，在这个框架下，当某个任务执行了context_switch，不过像是执行了一个耗时稍微久了一点但是啥也没干的函数。</p>
 <figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// oscamp/arceos/modules/axhal/src/arch/x86_64/context.rs</span></span><br><span class="line"><span class="keyword">unsafe</span> <span class="keyword">extern</span> <span class="string">&quot;C&quot;</span> <span class="keyword">fn</span> <span class="title function_">context_switch</span>(_current_stack: &amp;<span class="keyword">mut</span> <span class="type">u64</span>, _next_stack: &amp;<span class="type">u64</span>) &#123;</span><br><span class="line">    asm!(</span><br><span class="line">        <span class="string">&quot;</span></span><br><span class="line"><span class="string">        push    rbp</span></span><br><span class="line"><span class="string">        push    rbx</span></span><br><span class="line"><span class="string">        push    r12</span></span><br><span class="line"><span class="string">        push    r13</span></span><br><span class="line"><span class="string">        push    r14</span></span><br><span class="line"><span class="string">        push    r15</span></span><br><span class="line"><span class="string">        mov     [rdi], rsp // rdi寄存第一个参数</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        mov     rsp, [rsi]</span></span><br><span class="line"><span class="string">        pop     r15</span></span><br><span class="line"><span class="string">        pop     r14</span></span><br><span class="line"><span class="string">        pop     r13</span></span><br><span class="line"><span class="string">        pop     r12</span></span><br><span class="line"><span class="string">        pop     rbx</span></span><br><span class="line"><span class="string">        pop     rbp</span></span><br><span class="line"><span class="string">        ret&quot;</span>,</span><br><span class="line">        <span class="title function_ invoke__">options</span>(noreturn),</span><br><span class="line">    )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<h3 id="riscv"><a href="#riscv" class="headerlink" title="riscv"></a>riscv</h3><p>在TaskContext里面直接把各个寄存器显式地表示了，大致流程和上面也差不多。</p>
 <h2 id="未完待续"><a href="#未完待续" class="headerlink" title="未完待续"></a>未完待续</h2>
       
     </div>
@@ -152,6 +153,15 @@
   
     
 <nav id="article-nav">
+  
+    <a href="/2024/11/30/%E6%9C%80%E7%AE%80%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%86%85%E6%A0%B8%E6%9E%84%E5%BB%BA/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          最简宏内核模式内核构建
+        
+      </div>
+    </a>
   
   
     <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Bpaging/" id="article-nav-older" class="article-nav-link-wrap">
@@ -194,6 +204,10 @@
       <ul>
         
           <li>
+            <a href="/2024/11/30/%E6%9C%80%E7%AE%80%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%86%85%E6%A0%B8%E6%9E%84%E5%BB%BA/">最简宏内核模式内核构建</a>
+          </li>
+        
+          <li>
             <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxtask/">Unikernel组件之axtask</a>
           </li>
         
@@ -207,10 +221,6 @@
         
           <li>
             <a href="/2024/11/25/Unikernel%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/">Unikernel的基本启动流程</a>
-          </li>
-        
-          <li>
-            <a href="/2024/11/21/ggml%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/">ggml入门学习总结</a>
           </li>
         
       </ul>
