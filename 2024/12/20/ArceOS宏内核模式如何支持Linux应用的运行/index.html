@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>ArceOS宏内核模式如何支持Linux应用的运行 | Yumu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Linux应用运行条件Linux应用假定自己运行于Linux环境，它本身及依赖库及工具链都基于这一假定。需要明确的是，目前仅考虑riscv64架构。 此处说支持Linux应用，其实可以认为是，之前能够在Linux平台上运行的应用，现在能够不改变源码就在ArceOS操作系统内核之上正常运行。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ArceOS宏内核模式如何支持Linux应用的运行">
+<meta property="og:url" content="http://example.com/2024/12/20/ArceOS%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%A6%82%E4%BD%95%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E7%9A%84%E8%BF%90%E8%A1%8C/index.html">
+<meta property="og:site_name" content="Yumu">
+<meta property="og:description" content="Linux应用运行条件Linux应用假定自己运行于Linux环境，它本身及依赖库及工具链都基于这一假定。需要明确的是，目前仅考虑riscv64架构。 此处说支持Linux应用，其实可以认为是，之前能够在Linux平台上运行的应用，现在能够不改变源码就在ArceOS操作系统内核之上正常运行。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2024/11/21/hello-world/%E4%BD%95%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E7%9A%84%E8%BF%90%E8%A1%8C/ELF%E8%A7%A3%E6%9E%90.png">
+<meta property="article:published_time" content="2024-12-20T03:39:27.000Z">
+<meta property="article:modified_time" content="2024-12-21T02:46:21.208Z">
+<meta property="article:author" content="Chen Xumin">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/11/21/hello-world/%E4%BD%95%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E7%9A%84%E8%BF%90%E8%A1%8C/ELF%E8%A7%A3%E6%9E%90.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Yumu" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Yumu</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-ArceOS宏内核模式如何支持Linux应用的运行" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/12/20/ArceOS%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%A6%82%E4%BD%95%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E7%9A%84%E8%BF%90%E8%A1%8C/" class="article-date">
+  <time class="dt-published" datetime="2024-12-20T03:39:27.000Z" itemprop="datePublished">2024-12-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      ArceOS宏内核模式如何支持Linux应用的运行
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="Linux应用运行条件"><a href="#Linux应用运行条件" class="headerlink" title="Linux应用运行条件"></a>Linux应用运行条件</h1><p>Linux应用假定自己运行于Linux环境，它本身及依赖库及工具链都基于这一假定。需要明确的是，目前仅考虑riscv64架构。</p>
+<p>此处说支持Linux应用，其实可以认为是，之前能够在Linux平台上运行的应用，现在能够不改变源码就在ArceOS操作系统内核之上正常运行。</p>
+<span id="more"></span>
+
+<p>针对于C语言来说，我们平常所编写的应用程序，都会通过include来包含一些C标准库的接口。C标准库接口可以认为只是一些.h文件，其具体实现根据库的不同会有所差异。目前C标准库的实现主要就是GLibc和Musl_libc，前者更通用，后者更轻量，适合嵌入式等场景。同时GLibc和Musl_libc也是工具链，且行为会随目标系统和架构变化，例如<code>riscv64-linux-musl-gcc</code>编译工具,编译出的结果就是基于musl_libc的，目标操作系统为Linux，目标架构为riscv64，这样的应用，就是一种Linux应用。</p>
+<p>那么针对C语言，层次关系为：用户C语言程序层—Libc层-OS层。如果要保持之前的C语言程序层不变，不改变用户源码就能运行，我们起码有两个选择：</p>
+<ol>
+<li>在用户C语言程序层和Libc层之间改动，那么我们应当找到这两层之间的接口，即C标准库接口，然后基于现有内核（与Linux内核不完全相同），实现一个满足C标准库接口的库，这样用户源码不需要修改，但是仍需要重新基于这个库进行一次编译；</li>
+<li>在Libc层和OS层之间改动，比如直接将基于riscv64-linux-musl-gcc编译的应用运行在该OS上，无需重新编译。Libc层和OS层的交互，分为硬件管理的trap和主动触发的系统调用，此处我们处理的主要是后者，这样编译的应用默认底层操作系统是Linux，架构为riscv，在系统调用时会遵循一系列规则（由musl_libc保证），如使用ecall指令、把系统调用号放在a7寄存器、参数放在a0等寄存器等，且各个系统调用号对应的功能也遵循<a target="_blank" rel="noopener" href="https://jborza.com/post/2021-05-11-riscv-linux-syscalls/">riscv64_linux的规定</a>。所以，如果要在这一层支持Linux应用，只需要底层内核也遵循这一套规则就行了，至于底层内核的实现究竟是什么样，其实也是无所谓的。</li>
+</ol>
+<p>但是个人觉得，第二种更接近支持Linux应用（与高等程序代码无关）原本的意思，第一种更像是支持C语言应用（大部分与底层系统及架构无关），所以下面的解析也基于第二种方式。（仓库中ulibc文件夹下的axstd和axlibc，其实就像是第一种方式，前者支持rust应用，后者支持C应用）</p>
+<h1 id="支持Linux应用过程"><a href="#支持Linux应用过程" class="headerlink" title="支持Linux应用过程"></a>支持Linux应用过程</h1><h2 id="加载Linux应用的ELF文件"><a href="#加载Linux应用的ELF文件" class="headerlink" title="加载Linux应用的ELF文件"></a>加载Linux应用的ELF文件</h2><p>ELF文件格式是最广泛使用的应用链接和执行的格式。riscv64-linux-musl-gcc工具链支持生成ELF文件，如下命令可以解析生成的ELF文件，具体字段含义可问GPT。<br><img src="/2024/11/21/hello-world/%E4%BD%95%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E7%9A%84%E8%BF%90%E8%A1%8C/ELF%E8%A7%A3%E6%9E%90.png" alt="alt text"><br>按照ELF文件信息，将LOAD段放到对应的虚拟地址，由于不同的应用是各自独立编译的，单地址空间必然很容易load冲突，还需要<strong>多地址空间</strong>来防止应用间的干扰。</p>
+<h2 id="初始化用户栈"><a href="#初始化用户栈" class="headerlink" title="初始化用户栈"></a>初始化用户栈</h2><h2 id="当前进程spawn一个新进程来执行该应用"><a href="#当前进程spawn一个新进程来执行该应用" class="headerlink" title="当前进程spawn一个新进程来执行该应用"></a>当前进程spawn一个新进程来执行该应用</h2>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/12/20/ArceOS%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%A6%82%E4%BD%95%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E7%9A%84%E8%BF%90%E8%A1%8C/" data-id="cm4xkwst30000o2u20557e7h2" data-title="ArceOS宏内核模式如何支持Linux应用的运行" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2024/12/20/Unikernel%E6%A8%A1%E5%BC%8F%E5%B0%9D%E8%AF%95%E5%8A%AB%E6%8C%81ecall%E4%BB%A5%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E8%BF%90%E8%A1%8C/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Unikernel模式尝试劫持ecall以支持Linux应用运行
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2024/11/30/Debug-OpenSBI%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Debug-OpenSBI版本错误</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/12/">December 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/11/">November 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/12/21/Unikernel%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%8B%E6%94%AF%E6%8C%81Linux%E5%A4%9A%E5%BA%94%E7%94%A8%E7%9A%84%E5%89%8D%E6%9C%9F%E5%87%86%E5%A4%87/">Unikernel内核模式下支持Linux多应用的前期准备</a>
+          </li>
+        
+          <li>
+            <a href="/2024/12/20/Unikernel%E6%A8%A1%E5%BC%8F%E5%B0%9D%E8%AF%95%E5%8A%AB%E6%8C%81ecall%E4%BB%A5%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E8%BF%90%E8%A1%8C/">Unikernel模式尝试劫持ecall以支持Linux应用运行</a>
+          </li>
+        
+          <li>
+            <a href="/2024/12/20/ArceOS%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%A6%82%E4%BD%95%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E7%9A%84%E8%BF%90%E8%A1%8C/">ArceOS宏内核模式如何支持Linux应用的运行</a>
+          </li>
+        
+          <li>
+            <a href="/2024/11/30/Debug-OpenSBI%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/">Debug-OpenSBI版本错误</a>
+          </li>
+        
+          <li>
+            <a href="/2024/11/30/%E6%9C%80%E7%AE%80%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%86%85%E6%A0%B8%E6%9E%84%E5%BB%BA/">最简宏内核模式内核构建</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 Chen Xumin<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

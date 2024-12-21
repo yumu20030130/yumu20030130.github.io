@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Unikernel模式尝试劫持ecall以支持Linux应用运行 | Yumu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="前言在前面的博客中，提到了ArceOS宏内核模式是如何在libc层和OS层之间实现对Linux应用运行的支持的。而这些Linux应用，都是默认其运行于用户态，然后通过ecall陷入内核态，进行系统调用来访问内核功能。而Unikernel中，应用也运行于内核态，则其实只需要函数调用即可。如果想要纠正这种偏差，一种可以预见的方法是，通过对编译出来的elf文件里的所有ecall指令进行重写，将其变成一个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Unikernel模式尝试劫持ecall以支持Linux应用运行">
+<meta property="og:url" content="http://example.com/2024/12/20/Unikernel%E6%A8%A1%E5%BC%8F%E5%B0%9D%E8%AF%95%E5%8A%AB%E6%8C%81ecall%E4%BB%A5%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E8%BF%90%E8%A1%8C/index.html">
+<meta property="og:site_name" content="Yumu">
+<meta property="og:description" content="前言在前面的博客中，提到了ArceOS宏内核模式是如何在libc层和OS层之间实现对Linux应用运行的支持的。而这些Linux应用，都是默认其运行于用户态，然后通过ecall陷入内核态，进行系统调用来访问内核功能。而Unikernel中，应用也运行于内核态，则其实只需要函数调用即可。如果想要纠正这种偏差，一种可以预见的方法是，通过对编译出来的elf文件里的所有ecall指令进行重写，将其变成一个">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-12-20T12:53:08.000Z">
+<meta property="article:modified_time" content="2024-12-21T02:45:15.148Z">
+<meta property="article:author" content="Chen Xumin">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Yumu" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Yumu</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Unikernel模式尝试劫持ecall以支持Linux应用运行" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/12/20/Unikernel%E6%A8%A1%E5%BC%8F%E5%B0%9D%E8%AF%95%E5%8A%AB%E6%8C%81ecall%E4%BB%A5%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E8%BF%90%E8%A1%8C/" class="article-date">
+  <time class="dt-published" datetime="2024-12-20T12:53:08.000Z" itemprop="datePublished">2024-12-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Unikernel模式尝试劫持ecall以支持Linux应用运行
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在前面的博客中，提到了ArceOS宏内核模式是如何在libc层和OS层之间实现对Linux应用运行的支持的。<br>而这些Linux应用，都是默认其运行于用户态，然后通过ecall陷入内核态，进行系统调用来访问内核功能。而Unikernel中，应用也运行于内核态，则其实只需要函数调用即可。<br>如果想要纠正这种偏差，一种可以预见的方法是，通过对编译出来的elf文件里的所有ecall指令进行重写，将其变成一个跳转指令，以逃避ecall带来的各种特权级变换，同时满足函数调用的需求。</p>
+<span id="more"></span>
+<h1 id="需要做的改动"><a href="#需要做的改动" class="headerlink" title="需要做的改动"></a>需要做的改动</h1><p>这个功能其实可以由m_3_0(宏内核模式支持Linux应用)“退化”而来，基本思路是加载elf的可执行段时（含E标识）二进制重写其中的ecall，同时通过一些手段让进入用户空间时仍保持在内核态。</p>
+<h2 id="保持内核态"><a href="#保持内核态" class="headerlink" title="保持内核态"></a>保持内核态</h2><p>前面【最简宏内核模式内核构建】介绍过，一个进程首次从内核态进入用户态，是通过设置sstatus、sepc等寄存器，并利用sret的特性完成的。其中，sstatus寄存器中的SPP位就决定了sret之后应该是什么状态。</p>
+<p>如下所示，将SPP位设置为1，表明“进入内核态之前”是U态，那么之后sret就会返回U态</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// oscamp/arceos/modules/axhal/src/arch/riscv/context.rs</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">fn</span> <span class="title function_">new</span>(entry: <span class="type">usize</span>, ustack_top: VirtAddr) <span class="punctuation">-&gt;</span> <span class="keyword">Self</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> SPIE: <span class="type">usize</span> = <span class="number">1</span> &lt;&lt; <span class="number">5</span>;</span><br><span class="line">    <span class="keyword">const</span> SUM: <span class="type">usize</span> = <span class="number">1</span> &lt;&lt; <span class="number">18</span>;</span><br><span class="line">    <span class="keyword">const</span> SPP: <span class="type">usize</span> = <span class="number">1</span> &lt;&lt; <span class="number">8</span>;</span><br><span class="line">    <span class="title function_ invoke__">Self</span>(TrapFrame &#123;</span><br><span class="line">        regs: GeneralRegisters &#123;</span><br><span class="line">            sp: ustack_top.<span class="title function_ invoke__">as_usize</span>(),</span><br><span class="line">            ..<span class="built_in">Default</span>::<span class="title function_ invoke__">default</span>()</span><br><span class="line">        &#125;,</span><br><span class="line">        sepc: entry,</span><br><span class="line">        sstatus: SPIE | SUM | SPP,</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意，此处其实只影响了sret之后的状态，用户应用起始地址照常放在sepc寄存器，栈也可以照常转换为用户栈。<br>值得提醒的是，ecall会由硬件设置sepc和sstatus，sret会读取sepc和sstatus的值，但sscratch其实是不会被这两个指令影响的。它目前是常规用法：在进程进入用户态后保存着当前进程的内核栈地址，但这都是可以看你代码怎么写的，不是规定的。哪怕进程一直都只有内核态，它也可以分内核栈和用户栈。</p>
+<p>而且，有意思的是，在trap起始时，目前是通过观察sscratch寄存器是否为0来判断当前是否处于用户态的：<br>如果sscratch不为0，则认为目前处于用户态，sscratch中存着内核栈指针，则把sscratch和sp交换，开始使用内核栈。在这样的逻辑下，即使我们的应用实际处于内核态，但只要我们有用户栈，就也把我们当作用户态。</p>
+<p>说白了，某种意义上，之前的状态切换都没有消失，只是特权级始终不切换，仅仅切换栈。（可能仅有内核态之后用户栈是无意义的，但此处仅考虑这样能不能正常运行）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">.section .text</span><br><span class="line">.balign 4</span><br><span class="line">.global trap_vector_base</span><br><span class="line">trap_vector_base:</span><br><span class="line">    // sscratch == 0: trap from S mode</span><br><span class="line">    // sscratch != 0: trap from U mode</span><br><span class="line">    csrrw   sp, sscratch, sp            // swap sscratch and sp</span><br><span class="line">    bnez    sp, .Ltrap_entry_u</span><br><span class="line"></span><br><span class="line">    csrr    sp, sscratch                // put supervisor sp back</span><br><span class="line">    j       .Ltrap_entry_s</span><br><span class="line"></span><br><span class="line">.Ltrap_entry_s:</span><br><span class="line">    SAVE_REGS 0</span><br><span class="line">    mv      a0, sp</span><br><span class="line">    li      a1, 0</span><br><span class="line">    call    riscv_trap_handler</span><br><span class="line">    RESTORE_REGS 0</span><br><span class="line">    sret</span><br><span class="line"></span><br><span class="line">.Ltrap_entry_u:</span><br><span class="line">    SAVE_REGS 1</span><br><span class="line">    mv      a0, sp</span><br><span class="line">    li      a1, 1</span><br><span class="line">    call    riscv_trap_handler</span><br><span class="line">    RESTORE_REGS 1</span><br><span class="line">    sret</span><br></pre></td></tr></table></figure>
+<h2 id="增加函数调用处理者"><a href="#增加函数调用处理者" class="headerlink" title="增加函数调用处理者"></a>增加函数调用处理者</h2><p>效仿上面的trap_vector_base，可以加一个func_call_base，然后之后改写ecall（如果U态调用ecall，就会跳转到stvec寄存器存的地址，此处存的就是上面trap_vector_base的地址），使其跳转到这个函数就行了，使用<code>extern &quot;C&quot;</code>的方式可以在rust中获取func_call_base所在的虚拟地址。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">.global func_call_base</span><br><span class="line">func_call_base:</span><br><span class="line">    csrrw   sp, sscratch, sp            // swap sscratch and sp</span><br><span class="line">    SAVE_REGS 1</span><br><span class="line">    mv      a0, sp</span><br><span class="line">    call    func_call_handler</span><br><span class="line">    RESTORE_REGS 1</span><br><span class="line">    ret</span><br></pre></td></tr></table></figure>
+<p>此处改写，只是想逃避ecall带来的特权级转换，所以之后，func_call_handler的设计，直接使用riscv_trap_handler里的系统调用相关分支就行了。</p>
+<p>至此，一切看起来都很美好，应用始终保持在内核态，trap触发时能像之前一样该换栈时换栈，ecall单独处理，换成一个函数调用。</p>
+<h1 id="存在的问题"><a href="#存在的问题" class="headerlink" title="存在的问题"></a>存在的问题</h1><p>要保证改写复杂度低，就要保证跳转到func_call_base在一条仅有64位的指令中完成，如果想通过立即数直接跳到该函数，则需要保证这个函数的地址在地址空间的最低或者最高的一小个范围，而这些范围通常都有其他数据（ELF可执行的LOAD段一般就会在虚拟地址最低处，而最高的一段地址一般也不归应用用），如果用个寄存器一直存着这个函数的地址，感觉也很浪费。</p>
+<p>或者通过写链接脚本等方式，强制musl_libc编译出来的ELF文件把最开始的一段空间空出来，是可以做到的，但这个劫持方式的初衷，就是像musl_libc之前编译出来的应用直接可以运行，这样又要重新编译的话，似乎违背初衷了。</p>
+<p>上面说了这么多，但我甚至还没能简单运行出一个简单的hello，所以“坑”可能比我想象的还要多得多。不管怎么样，算是一个尝试吧。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/12/20/Unikernel%E6%A8%A1%E5%BC%8F%E5%B0%9D%E8%AF%95%E5%8A%AB%E6%8C%81ecall%E4%BB%A5%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E8%BF%90%E8%A1%8C/" data-id="cm4xkwst70002o2u22l9gcac4" data-title="Unikernel模式尝试劫持ecall以支持Linux应用运行" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2024/12/21/Unikernel%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%8B%E6%94%AF%E6%8C%81Linux%E5%A4%9A%E5%BA%94%E7%94%A8%E7%9A%84%E5%89%8D%E6%9C%9F%E5%87%86%E5%A4%87/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Unikernel内核模式下支持Linux多应用的前期准备
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2024/12/20/ArceOS%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%A6%82%E4%BD%95%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E7%9A%84%E8%BF%90%E8%A1%8C/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">ArceOS宏内核模式如何支持Linux应用的运行</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/12/">December 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/11/">November 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/12/21/Unikernel%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%8B%E6%94%AF%E6%8C%81Linux%E5%A4%9A%E5%BA%94%E7%94%A8%E7%9A%84%E5%89%8D%E6%9C%9F%E5%87%86%E5%A4%87/">Unikernel内核模式下支持Linux多应用的前期准备</a>
+          </li>
+        
+          <li>
+            <a href="/2024/12/20/Unikernel%E6%A8%A1%E5%BC%8F%E5%B0%9D%E8%AF%95%E5%8A%AB%E6%8C%81ecall%E4%BB%A5%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E8%BF%90%E8%A1%8C/">Unikernel模式尝试劫持ecall以支持Linux应用运行</a>
+          </li>
+        
+          <li>
+            <a href="/2024/12/20/ArceOS%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%A6%82%E4%BD%95%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E7%9A%84%E8%BF%90%E8%A1%8C/">ArceOS宏内核模式如何支持Linux应用的运行</a>
+          </li>
+        
+          <li>
+            <a href="/2024/11/30/Debug-OpenSBI%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/">Debug-OpenSBI版本错误</a>
+          </li>
+        
+          <li>
+            <a href="/2024/11/30/%E6%9C%80%E7%AE%80%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%86%85%E6%A0%B8%E6%9E%84%E5%BB%BA/">最简宏内核模式内核构建</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 Chen Xumin<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

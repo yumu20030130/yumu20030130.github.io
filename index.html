@@ -69,6 +69,139 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Unikernel内核模式下支持Linux多应用的前期准备" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/12/21/Unikernel%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%8B%E6%94%AF%E6%8C%81Linux%E5%A4%9A%E5%BA%94%E7%94%A8%E7%9A%84%E5%89%8D%E6%9C%9F%E5%87%86%E5%A4%87/" class="article-date">
+  <time class="dt-published" datetime="2024-12-21T01:08:15.000Z" itemprop="datePublished">2024-12-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/12/21/Unikernel%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%8B%E6%94%AF%E6%8C%81Linux%E5%A4%9A%E5%BA%94%E7%94%A8%E7%9A%84%E5%89%8D%E6%9C%9F%E5%87%86%E5%A4%87/">Unikernel内核模式下支持Linux多应用的前期准备</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>题目链接：<a target="_blank" rel="noopener" href="https://raw.githubusercontent.com/arceos-org/oscamp/refs/heads/main/tour_books/prepare_unikernel_for_linux_apps/README.md">https://raw.githubusercontent.com/arceos-org/oscamp/refs/heads/main/tour_books/prepare_unikernel_for_linux_apps/README.md</a></p>
+<p>代码实现仓库（包含实验五的复现方式）：<a target="_blank" rel="noopener" href="https://github.com/yumu20030130/arceos">https://github.com/yumu20030130/arceos</a></p>
+<p>通过这个实验，主要学习了ArceOS的Unikernel模式下如何加载用户程序并执行。之前是内核直接启动一个应用（该应用不可被加载，是和内核一起编译的），现在把这个应用变成一个loader程序，然后通过这个程序再去加载一个或多个外部的用户程序，且加载的是bin文件而非elf文件，直接省去了elf加载的细节，只需把整个文件都load到内存中，并设置正确的执行开始入口，即可开始运行。</p>
+<p>这样是最基础且最简单的加载方式，通过这些实验，可以很好地理解，Unikernel下加载一个最简单应用需要做什么。</p>
+        
+          <p class="article-more-link">
+            <a href="/2024/12/21/Unikernel%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%8B%E6%94%AF%E6%8C%81Linux%E5%A4%9A%E5%BA%94%E7%94%A8%E7%9A%84%E5%89%8D%E6%9C%9F%E5%87%86%E5%A4%87/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/12/21/Unikernel%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%8B%E6%94%AF%E6%8C%81Linux%E5%A4%9A%E5%BA%94%E7%94%A8%E7%9A%84%E5%89%8D%E6%9C%9F%E5%87%86%E5%A4%87/" data-id="cm4xkwst50001o2u2eqwp64s1" data-title="Unikernel内核模式下支持Linux多应用的前期准备" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-Unikernel模式尝试劫持ecall以支持Linux应用运行" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/12/20/Unikernel%E6%A8%A1%E5%BC%8F%E5%B0%9D%E8%AF%95%E5%8A%AB%E6%8C%81ecall%E4%BB%A5%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E8%BF%90%E8%A1%8C/" class="article-date">
+  <time class="dt-published" datetime="2024-12-20T12:53:08.000Z" itemprop="datePublished">2024-12-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/12/20/Unikernel%E6%A8%A1%E5%BC%8F%E5%B0%9D%E8%AF%95%E5%8A%AB%E6%8C%81ecall%E4%BB%A5%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E8%BF%90%E8%A1%8C/">Unikernel模式尝试劫持ecall以支持Linux应用运行</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在前面的博客中，提到了ArceOS宏内核模式是如何在libc层和OS层之间实现对Linux应用运行的支持的。<br>而这些Linux应用，都是默认其运行于用户态，然后通过ecall陷入内核态，进行系统调用来访问内核功能。而Unikernel中，应用也运行于内核态，则其实只需要函数调用即可。<br>如果想要纠正这种偏差，一种可以预见的方法是，通过对编译出来的elf文件里的所有ecall指令进行重写，将其变成一个跳转指令，以逃避ecall带来的各种特权级变换，同时满足函数调用的需求。</p>
+        
+          <p class="article-more-link">
+            <a href="/2024/12/20/Unikernel%E6%A8%A1%E5%BC%8F%E5%B0%9D%E8%AF%95%E5%8A%AB%E6%8C%81ecall%E4%BB%A5%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E8%BF%90%E8%A1%8C/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/12/20/Unikernel%E6%A8%A1%E5%BC%8F%E5%B0%9D%E8%AF%95%E5%8A%AB%E6%8C%81ecall%E4%BB%A5%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E8%BF%90%E8%A1%8C/" data-id="cm4xkwst70002o2u22l9gcac4" data-title="Unikernel模式尝试劫持ecall以支持Linux应用运行" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-ArceOS宏内核模式如何支持Linux应用的运行" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/12/20/ArceOS%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%A6%82%E4%BD%95%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E7%9A%84%E8%BF%90%E8%A1%8C/" class="article-date">
+  <time class="dt-published" datetime="2024-12-20T03:39:27.000Z" itemprop="datePublished">2024-12-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/12/20/ArceOS%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%A6%82%E4%BD%95%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E7%9A%84%E8%BF%90%E8%A1%8C/">ArceOS宏内核模式如何支持Linux应用的运行</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="Linux应用运行条件"><a href="#Linux应用运行条件" class="headerlink" title="Linux应用运行条件"></a>Linux应用运行条件</h1><p>Linux应用假定自己运行于Linux环境，它本身及依赖库及工具链都基于这一假定。需要明确的是，目前仅考虑riscv64架构。</p>
+<p>此处说支持Linux应用，其实可以认为是，之前能够在Linux平台上运行的应用，现在能够不改变源码就在ArceOS操作系统内核之上正常运行。</p>
+        
+          <p class="article-more-link">
+            <a href="/2024/12/20/ArceOS%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%A6%82%E4%BD%95%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E7%9A%84%E8%BF%90%E8%A1%8C/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/12/20/ArceOS%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%A6%82%E4%BD%95%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E7%9A%84%E8%BF%90%E8%A1%8C/" data-id="cm4xkwst30000o2u20557e7h2" data-title="ArceOS宏内核模式如何支持Linux应用的运行" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-Debug-OpenSBI版本错误" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/11/30/Debug-OpenSBI%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/" class="article-date">
@@ -380,58 +513,12 @@
 
 
   
-    <article id="post-hello-world" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/11/21/hello-world/" class="article-date">
-  <time class="dt-published" datetime="2024-11-21T11:15:49.689Z" itemprop="datePublished">2024-11-21</time>
-</a>
+
+
+  <nav id="page-nav">
     
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/11/21/hello-world/">Hello World</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/11/21/hello-world/" data-id="cm3r81o6p0000atu26yqu325i" data-title="Hello World" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+  </nav>
 
 </section>
         
@@ -449,7 +536,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/11/">November 2024</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/12/">December 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/11/">November 2024</a></li></ul>
     </div>
   </div>
 
@@ -462,23 +549,23 @@
       <ul>
         
           <li>
+            <a href="/2024/12/21/Unikernel%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%8B%E6%94%AF%E6%8C%81Linux%E5%A4%9A%E5%BA%94%E7%94%A8%E7%9A%84%E5%89%8D%E6%9C%9F%E5%87%86%E5%A4%87/">Unikernel内核模式下支持Linux多应用的前期准备</a>
+          </li>
+        
+          <li>
+            <a href="/2024/12/20/Unikernel%E6%A8%A1%E5%BC%8F%E5%B0%9D%E8%AF%95%E5%8A%AB%E6%8C%81ecall%E4%BB%A5%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E8%BF%90%E8%A1%8C/">Unikernel模式尝试劫持ecall以支持Linux应用运行</a>
+          </li>
+        
+          <li>
+            <a href="/2024/12/20/ArceOS%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%A6%82%E4%BD%95%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E7%9A%84%E8%BF%90%E8%A1%8C/">ArceOS宏内核模式如何支持Linux应用的运行</a>
+          </li>
+        
+          <li>
             <a href="/2024/11/30/Debug-OpenSBI%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/">Debug-OpenSBI版本错误</a>
           </li>
         
           <li>
             <a href="/2024/11/30/%E6%9C%80%E7%AE%80%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%86%85%E6%A0%B8%E6%9E%84%E5%BB%BA/">最简宏内核模式内核构建</a>
-          </li>
-        
-          <li>
-            <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxtask/">Unikernel组件之axtask</a>
-          </li>
-        
-          <li>
-            <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Bpaging/">Unikernel组件之paging</a>
-          </li>
-        
-          <li>
-            <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxalloc/">Unikernel组件之axalloc</a>
           </li>
         
       </ul>

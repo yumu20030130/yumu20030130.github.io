@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Unikernel内核模式下支持Linux多应用的前期准备 | Yumu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="题目链接：https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;arceos-org&#x2F;oscamp&#x2F;refs&#x2F;heads&#x2F;main&#x2F;tour_books&#x2F;prepare_unikernel_for_linux_apps&#x2F;README.md 代码实现仓库（包含实验五的复现方式）：https:&#x2F;&#x2F;github.com&#x2F;yumu20030130&#x2F;arceos 通过这个实验，主要学习了Arc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Unikernel内核模式下支持Linux多应用的前期准备">
+<meta property="og:url" content="http://example.com/2024/12/21/Unikernel%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%8B%E6%94%AF%E6%8C%81Linux%E5%A4%9A%E5%BA%94%E7%94%A8%E7%9A%84%E5%89%8D%E6%9C%9F%E5%87%86%E5%A4%87/index.html">
+<meta property="og:site_name" content="Yumu">
+<meta property="og:description" content="题目链接：https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;arceos-org&#x2F;oscamp&#x2F;refs&#x2F;heads&#x2F;main&#x2F;tour_books&#x2F;prepare_unikernel_for_linux_apps&#x2F;README.md 代码实现仓库（包含实验五的复现方式）：https:&#x2F;&#x2F;github.com&#x2F;yumu20030130&#x2F;arceos 通过这个实验，主要学习了Arc">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-12-21T01:08:15.000Z">
+<meta property="article:modified_time" content="2024-12-21T02:45:07.719Z">
+<meta property="article:author" content="Chen Xumin">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Yumu" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Yumu</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Unikernel内核模式下支持Linux多应用的前期准备" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/12/21/Unikernel%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%8B%E6%94%AF%E6%8C%81Linux%E5%A4%9A%E5%BA%94%E7%94%A8%E7%9A%84%E5%89%8D%E6%9C%9F%E5%87%86%E5%A4%87/" class="article-date">
+  <time class="dt-published" datetime="2024-12-21T01:08:15.000Z" itemprop="datePublished">2024-12-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Unikernel内核模式下支持Linux多应用的前期准备
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>题目链接：<a target="_blank" rel="noopener" href="https://raw.githubusercontent.com/arceos-org/oscamp/refs/heads/main/tour_books/prepare_unikernel_for_linux_apps/README.md">https://raw.githubusercontent.com/arceos-org/oscamp/refs/heads/main/tour_books/prepare_unikernel_for_linux_apps/README.md</a></p>
+<p>代码实现仓库（包含实验五的复现方式）：<a target="_blank" rel="noopener" href="https://github.com/yumu20030130/arceos">https://github.com/yumu20030130/arceos</a></p>
+<p>通过这个实验，主要学习了ArceOS的Unikernel模式下如何加载用户程序并执行。之前是内核直接启动一个应用（该应用不可被加载，是和内核一起编译的），现在把这个应用变成一个loader程序，然后通过这个程序再去加载一个或多个外部的用户程序，且加载的是bin文件而非elf文件，直接省去了elf加载的细节，只需把整个文件都load到内存中，并设置正确的执行开始入口，即可开始运行。</p>
+<p>这样是最基础且最简单的加载方式，通过这些实验，可以很好地理解，Unikernel下加载一个最简单应用需要做什么。</p>
+<span id="more"></span>
+<h1 id="Debug方式"><a href="#Debug方式" class="headerlink" title="Debug方式"></a>Debug方式</h1><h2 id="查看应用的elf文件"><a href="#查看应用的elf文件" class="headerlink" title="查看应用的elf文件"></a>查看应用的elf文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">riscv64-linux-musl-readelf -lw ./payload/hello_c/hello</span><br></pre></td></tr></table></figure>
+<p>主要看text段，看该程序的汇编执行代码，以及都有哪些段，是怎么布局的</p>
+<h2 id="查看应用的bin文件"><a href="#查看应用的bin文件" class="headerlink" title="查看应用的bin文件"></a>查看应用的bin文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xxd -l 6 ./payload/apps.bin</span><br></pre></td></tr></table></figure>
+<p>和elf文件对照着看，大致了解elf文件到bin文件是怎么转换的。（可以发现，在有了字符串字面量之后，除了text段还会有数据段，放在bin文件的最开始，此时程序开始执行位置就不是bin文件的起始了，loader开始执行应用的起始地址需要修改）</p>
+<h2 id="查看qemu-log"><a href="#查看qemu-log" class="headerlink" title="查看qemu.log"></a>查看qemu.log</h2><p>可以看到实际运行了哪些汇编命令，具体设置看<a target="_blank" rel="noopener" href="https://raw.githubusercontent.com/arceos-org/oscamp/refs/heads/main/tour_books/prepare_unikernel_for_linux_apps/README.md">https://raw.githubusercontent.com/arceos-org/oscamp/refs/heads/main/tour_books/prepare_unikernel_for_linux_apps/README.md</a></p>
+<h1 id="练习1"><a href="#练习1" class="headerlink" title="练习1"></a>练习1</h1><p>练习一：之前是分配一个固定大小的虚拟地址空间（32字节）来load应用，现在要求在load应用时动态获取应用大小；</p>
+<p>简单做法：设计一个Image头，在执行APP编译及入磁盘脚本时，把各个应用的大小放在PFLASH的最前面（在所有应用之前），loader程序一开始就先加载这部分内容，初始化一个ImageHeader对象。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">ImageHeader</span> &#123;</span><br><span class="line">    files_size: [<span class="type">u8</span>; APP_NUM],</span><br><span class="line">&#125;</span><br><span class="line">由于入磁盘脚本使用的是dd命令，不支持多个dd命令连续写（默认覆盖写），但可以指定开始写的块（块大小设置为<span class="number">1</span>M）。所以，此处将第一个块用于放置所有应用的大小，剩下一个块放一个应用（则一个应用不得超过<span class="number">1</span>M）。</span><br></pre></td></tr></table></figure>
+<h1 id="练习2"><a href="#练习2" class="headerlink" title="练习2"></a>练习2</h1><p>练习二：支持连续加载两个应用（每个应用只有一条指令）并拼接起来运行。</p>
+<p>简单做法：可以观察到，最简单的应用（仅含一条指令），编译出来的bin文件也就只有一条指令，理论上加载到连续的虚拟地址空间即可拼接运行，但是由于应用中有option(noreturn),会导致多两个00字节在bin文件最后，所以实际上，最后两个字节不要加载。</p>
+<h1 id="练习3"><a href="#练习3" class="headerlink" title="练习3"></a>练习3</h1><p>练习三：批处理方式执行两个单行代码应用，第一个应用的单行代码是<code>nop</code>，第二个的是<code>wfi</code>。</p>
+<p>简单做法：在最外面套一层for循环就行了，每次只加载一个应用</p>
+<h1 id="练习4"><a href="#练习4" class="headerlink" title="练习4"></a>练习4</h1><p>练习四：支持一个新的系统调用</p>
+<p>简单做法：仿照示例拓展一下就行了</p>
+<h1 id="练习5"><a href="#练习5" class="headerlink" title="练习5"></a>练习5</h1><p>练习五：应用hello_app通过ABI获取loader测（OS侧）提供的服务。</p>
+<p>简单做法：<br>loader程序在跳转到用户程序之前，将ABI_TABLE（一个函数数组地址，数组元素是对应索引的服务函数地址）放在a7寄存器中，此处可以在一开始将a7寄存器保存下来，之后通过直接写rust代码来让编译器去规范寄存器使用，以逃避一些难以理解的寄存器误改。（注释处是之前存在问题的汇编代码）</p>
+<p>效果：<br>可以多次调用hello、puts、terminal函数，即多次通过ABI方式调用OS提供的服务。此处，调用OS提供的服务实际上就是普通的function_call，而不是syscall，这也正是Unikernel需要的。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#![feature(asm_const)]</span></span><br><span class="line"><span class="meta">#![no_std]</span></span><br><span class="line"><span class="meta">#![no_main]</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">use</span> core::mem;</span><br><span class="line"><span class="keyword">const</span> SYS_HELLO: <span class="type">usize</span> = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">const</span> SYS_PUTCHAR: <span class="type">usize</span> = <span class="number">2</span>;</span><br><span class="line"><span class="keyword">const</span> SYS_TERMINATE: <span class="type">usize</span> = <span class="number">3</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">mut</span> ABI_TABLE: <span class="type">usize</span> = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">unsafe</span> <span class="keyword">fn</span> <span class="title function_">syscall</span>(abi_num: <span class="type">usize</span>, arg0: <span class="type">usize</span>) <span class="punctuation">-&gt;</span> <span class="type">isize</span> &#123;</span><br><span class="line">    <span class="keyword">type</span> <span class="title class_">FunctionType</span> = <span class="title function_ invoke__">fn</span>(<span class="type">usize</span>);</span><br><span class="line">    <span class="keyword">unsafe</span> &#123;</span><br><span class="line">        <span class="comment">// 将 usize 转换为函数指针并调用</span></span><br><span class="line">        <span class="comment">// 记得做取值操作：   对应 ld  t1, (t1)</span></span><br><span class="line">        <span class="keyword">let</span> <span class="variable">func_ptr</span>: FunctionType = mem::<span class="title function_ invoke__">transmute</span>(*((ABI_TABLE + abi_num * <span class="number">8</span>) <span class="keyword">as</span> *<span class="keyword">const</span> <span class="type">usize</span>));</span><br><span class="line">        <span class="title function_ invoke__">func_ptr</span>(arg0)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// core::arch::asm!(&quot;</span></span><br><span class="line">    <span class="comment">//     slli    t0, t0, 3</span></span><br><span class="line">    <span class="comment">//     add     t1, a7, t0</span></span><br><span class="line">    <span class="comment">//     ld      t1, (t1)</span></span><br><span class="line">    <span class="comment">//     jalr    t1</span></span><br><span class="line">    <span class="comment">//     &quot;,</span></span><br><span class="line">    <span class="comment">//     in(&quot;a7&quot;) ABI_TABLE,</span></span><br><span class="line">    <span class="comment">//     in(&quot;t0&quot;) abi_num,</span></span><br><span class="line">    <span class="comment">//     in(&quot;a0&quot;) arg0,</span></span><br><span class="line">    <span class="comment">// );</span></span><br><span class="line">    <span class="number">0</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">hello</span>() <span class="punctuation">-&gt;</span> <span class="type">isize</span> &#123;</span><br><span class="line">    <span class="keyword">unsafe</span> &#123; <span class="title function_ invoke__">syscall</span>(SYS_HELLO, <span class="number">0</span>) &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">putchar</span>(c: <span class="type">char</span>) <span class="punctuation">-&gt;</span> <span class="type">isize</span> &#123;</span><br><span class="line">    <span class="keyword">unsafe</span> &#123; <span class="title function_ invoke__">syscall</span>(SYS_PUTCHAR, c <span class="keyword">as</span> <span class="type">usize</span>) &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">terminate</span>() <span class="punctuation">-&gt;</span> <span class="type">isize</span> &#123;</span><br><span class="line">    <span class="keyword">unsafe</span> &#123; <span class="title function_ invoke__">syscall</span>(SYS_TERMINATE, <span class="number">0</span>) &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">puts</span>(s: &amp;<span class="type">str</span>) <span class="punctuation">-&gt;</span> <span class="type">isize</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> <span class="variable">c</span> <span class="keyword">in</span> s.<span class="title function_ invoke__">chars</span>() &#123;</span><br><span class="line">        <span class="title function_ invoke__">putchar</span>(c);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="title function_ invoke__">putchar</span>(<span class="string">&#x27;\n&#x27;</span>);</span><br><span class="line">    <span class="number">0</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[no_mangle]</span></span><br><span class="line"><span class="keyword">unsafe</span> <span class="keyword">extern</span> <span class="string">&quot;C&quot;</span> <span class="keyword">fn</span> <span class="title function_">_start</span>() <span class="punctuation">-&gt;</span> ! &#123;</span><br><span class="line">    <span class="keyword">unsafe</span> &#123;</span><br><span class="line">        core::arch::asm!(</span><br><span class="line">            <span class="string">&quot;mv &#123;0&#125;, a7&quot;</span>,    <span class="comment">// 将 a7 寄存器的值移到ABI_TABLE</span></span><br><span class="line">            <span class="title function_ invoke__">out</span>(reg) ABI_TABLE,  </span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="title function_ invoke__">hello</span>();</span><br><span class="line">    <span class="title function_ invoke__">puts</span>(<span class="string">&quot;puts&quot;</span>);</span><br><span class="line">    <span class="title function_ invoke__">terminate</span>();</span><br><span class="line">    <span class="keyword">loop</span> &#123; &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">use</span> core::panic::PanicInfo;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[panic_handler]</span></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">panic</span>(_info: &amp;PanicInfo) <span class="punctuation">-&gt;</span> ! &#123;</span><br><span class="line">    <span class="keyword">loop</span> &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>在上面的代码中，如果使用汇编代码，会发现，<code>puts(&quot;puts&quot;)</code>在输出第二个字符时会出错，而如果换成多个单字符输出，而不是使用for循环，就不会有问题。</p>
+<p>如果直接使用多次putchar，实际没有需要维护的寄存器上下文，直接写这种调用函数前没有保存寄存器的汇编是没问题的，而for循环使用了a1寄存器，此时没有保存a1寄存器，而callee不负责保存a1寄存器，可能直接更改（观察qemu.log，可以发现确实如此），从而导致之后for循环出问题。</p>
+<p>在riscv标准中，caller负责保存及恢复a0<del>a7、t0</del>t6、ra寄存器，之后才是将参数放到对应的a0等寄存器。callee负责保存及恢复s0 ~ s11寄存器，即其他寄存器，callee都是默认已经保存，可以直接改的。</p>
+<p>所以，如果使用rust编写的函数调用，编译器会根据当前的上下文，决定哪些寄存器需要保存，所以直接使用rust调用就没问题。</p>
+<p>如果硬要自己写汇编，跳转到对应的ABI函数，最好就是按照riscv标准，在跳转之前保存好所有负责保存的寄存器，这样就也不会出错。</p>
+<p>此外，可以将a7寄存器传递ABI_TABLE改为a0寄存器传递，这样给_start增加一个参数，就可以直接免去所有直接汇编书写，完全避免寄存器操作不当。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/12/21/Unikernel%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%8B%E6%94%AF%E6%8C%81Linux%E5%A4%9A%E5%BA%94%E7%94%A8%E7%9A%84%E5%89%8D%E6%9C%9F%E5%87%86%E5%A4%87/" data-id="cm4xkwst50001o2u2eqwp64s1" data-title="Unikernel内核模式下支持Linux多应用的前期准备" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2024/12/20/Unikernel%E6%A8%A1%E5%BC%8F%E5%B0%9D%E8%AF%95%E5%8A%AB%E6%8C%81ecall%E4%BB%A5%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E8%BF%90%E8%A1%8C/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Unikernel模式尝试劫持ecall以支持Linux应用运行</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/12/">December 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/11/">November 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/12/21/Unikernel%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%8B%E6%94%AF%E6%8C%81Linux%E5%A4%9A%E5%BA%94%E7%94%A8%E7%9A%84%E5%89%8D%E6%9C%9F%E5%87%86%E5%A4%87/">Unikernel内核模式下支持Linux多应用的前期准备</a>
+          </li>
+        
+          <li>
+            <a href="/2024/12/20/Unikernel%E6%A8%A1%E5%BC%8F%E5%B0%9D%E8%AF%95%E5%8A%AB%E6%8C%81ecall%E4%BB%A5%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E8%BF%90%E8%A1%8C/">Unikernel模式尝试劫持ecall以支持Linux应用运行</a>
+          </li>
+        
+          <li>
+            <a href="/2024/12/20/ArceOS%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%A6%82%E4%BD%95%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E7%9A%84%E8%BF%90%E8%A1%8C/">ArceOS宏内核模式如何支持Linux应用的运行</a>
+          </li>
+        
+          <li>
+            <a href="/2024/11/30/Debug-OpenSBI%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/">Debug-OpenSBI版本错误</a>
+          </li>
+        
+          <li>
+            <a href="/2024/11/30/%E6%9C%80%E7%AE%80%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%86%85%E6%A0%B8%E6%9E%84%E5%BB%BA/">最简宏内核模式内核构建</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 Chen Xumin<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
