@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>InfiniBand及RDMA入门学习记录 | Yumu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="链接：https:&#x2F;&#x2F;cloud.tencent.com&#x2F;developer&#x2F;article&#x2F;2314766 InfiniBand概念InfiniBand（无限带宽）是一种高性能、低延迟、高带宽的网络架构，专为大规模并行计算（如高性能计算、超算、数据中心等）设计， 关注存储设备之间的连接。它提供了一套完整的硬件和协议标准，支持多个通信模型，包括点对点通信、广播和组播。 核心公司：Mellanox（">
+<meta property="og:type" content="article">
+<meta property="og:title" content="InfiniBand及RDMA入门学习记录">
+<meta property="og:url" content="http://example.com/2024/12/30/InfiniBand%E5%8F%8ARDMA%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/index.html">
+<meta property="og:site_name" content="Yumu">
+<meta property="og:description" content="链接：https:&#x2F;&#x2F;cloud.tencent.com&#x2F;developer&#x2F;article&#x2F;2314766 InfiniBand概念InfiniBand（无限带宽）是一种高性能、低延迟、高带宽的网络架构，专为大规模并行计算（如高性能计算、超算、数据中心等）设计， 关注存储设备之间的连接。它提供了一套完整的硬件和协议标准，支持多个通信模型，包括点对点通信、广播和组播。 核心公司：Mellanox（">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2024/11/21/hello-world/DMA%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/InfiniBand%E5%92%8C%E4%BB%A5%E5%A4%AA%E7%BD%91%E7%9A%84%E5%8C%BA%E5%88%AB.png">
+<meta property="article:published_time" content="2024-12-30T07:24:10.000Z">
+<meta property="article:modified_time" content="2024-12-30T08:33:38.853Z">
+<meta property="article:author" content="Chen Xumin">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/11/21/hello-world/DMA%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/InfiniBand%E5%92%8C%E4%BB%A5%E5%A4%AA%E7%BD%91%E7%9A%84%E5%8C%BA%E5%88%AB.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Yumu" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Yumu</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-InfiniBand及RDMA入门学习记录" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/12/30/InfiniBand%E5%8F%8ARDMA%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/" class="article-date">
+  <time class="dt-published" datetime="2024-12-30T07:24:10.000Z" itemprop="datePublished">2024-12-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      InfiniBand及RDMA入门学习记录
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>链接：<a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2314766">https://cloud.tencent.com/developer/article/2314766</a></p>
+<h1 id="InfiniBand概念"><a href="#InfiniBand概念" class="headerlink" title="InfiniBand概念"></a>InfiniBand概念</h1><p>InfiniBand（无限带宽）是一种高性能、低延迟、高带宽的网络架构，专为大规模并行计算（如高性能计算、超算、数据中心等）设计， 关注<strong>存储设备之间的连接</strong>。它提供了一套<strong>完整的硬件和协议标准</strong>，支持多个通信模型，包括点对点通信、广播和组播。</p>
+<p>核心公司：Mellanox（迈络思），后被nvidia收购。</p>
+<p>核心技术：RDMA（远程直接内存访问）。后面以太网也支持了该技术（InfiniBand仍有许多特点，例如直接在硬件上支持了零拷贝）</p>
+<p>直接竞争者：Ethernet（以太网）。尤其是25Gps以上的高速以太网。二者主要区别如下，InfiniBand消灭了中间商：<br><img src="/2024/11/21/hello-world/DMA%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/InfiniBand%E5%92%8C%E4%BB%A5%E5%A4%AA%E7%BD%91%E7%9A%84%E5%8C%BA%E5%88%AB.png" alt="alt text"></p>
+<h1 id="InfiniBand配套硬件（NVIDIA-Quantum-2-部分硬件）"><a href="#InfiniBand配套硬件（NVIDIA-Quantum-2-部分硬件）" class="headerlink" title="InfiniBand配套硬件（NVIDIA Quantum-2 部分硬件）"></a>InfiniBand配套硬件（NVIDIA Quantum-2 部分硬件）</h1><p>英伟达收购Mellanox之后，于2021年推出了自己的第七代NVIDIA InfiniBand架构——NVIDIA Quantum-2。该架构有一系列硬件。<br>下面命令可以查看当前服务器是否有对应设备以及实际型号（若该设备是pcie设备）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lspci | grep Mellanox</span><br></pre></td></tr></table></figure>
+<h2 id="ConnectX系列-Adapter"><a href="#ConnectX系列-Adapter" class="headerlink" title="ConnectX系列 Adapter"></a>ConnectX系列 Adapter</h2><p>属于一个pcie设备，是一个InifiniBand网络架构（当然也支持RDMA）的网卡，两个有该网卡的服务器可以互相执行RDMA。</p>
+<h2 id="BlueField-InfiniBand-DPU"><a href="#BlueField-InfiniBand-DPU" class="headerlink" title="BlueField InfiniBand DPU"></a>BlueField InfiniBand DPU</h2><p>属于一个pcie设备，集成了数据处理单元（不受cpu控制，可制定一些规则，处理掉某些数据包而不用再传给cpu，减轻cpu负担），可以看作一个smartnic。</p>
+<h1 id="OFED（OpenFabrics-Enterprise-Distribution）"><a href="#OFED（OpenFabrics-Enterprise-Distribution）" class="headerlink" title="OFED（OpenFabrics Enterprise Distribution）"></a>OFED（OpenFabrics Enterprise Distribution）</h1><p>一个专为高性能计算（HPC）、数据中心和存储网络设计的开源软件包。它的主要作用是<strong>为支持 InfiniBand 和 RDMA（远程直接内存访问）技术的硬件提供驱动程序、库和工具</strong>，使这些硬件能够高效运行。</p>
+<p>这个库非常全面，所以当需要某个rdma相关的工具包时，不要急着下载，先看看这里面有没有包含。</p>
+<p>主要功能如下：</p>
+<h2 id="驱动程序支持"><a href="#驱动程序支持" class="headerlink" title="驱动程序支持"></a>驱动程序支持</h2><p>OFED 提供了许多硬件厂商的网络设备的驱动程序（如 Mellanox、Intel 等），以正常使用对应的RDMA设备。</p>
+<h2 id="开发和运行-RDMA-应用程序"><a href="#开发和运行-RDMA-应用程序" class="headerlink" title="开发和运行 RDMA 应用程序"></a>开发和运行 RDMA 应用程序</h2><p>提供一套用户态的 RDMA API（如 libibverbs 和 librdmacm），使开发者可以编写基于 RDMA 的高效分布式应用。</p>
+<h2 id="性能测试与调优"><a href="#性能测试与调优" class="headerlink" title="性能测试与调优"></a>性能测试与调优</h2><p>提供了perftest工具包（包含 ib_read_bw、ib_write_bw、ib_send_bw等功能），用于测试和调试 InfiniBand 或 RDMA 网络的性能。<br>如，服务端输入<code>ib_read_bw</code>，客户端输入<code>ib_read_bw 服务端地址</code>，即可测试客户端向服务端读取数据的带宽。</p>
+<p>perftest 5.7.0 前后版本不兼容。如果实在服务器与要测试的服务器的perftest版本兼容，也可以一台服务器测试性能，自己发自己收，因为rdma是全双工的，进出带宽不会互相影响。</p>
+<h2 id="设备管理支持"><a href="#设备管理支持" class="headerlink" title="设备管理支持"></a>设备管理支持</h2><p><code>ibstat</code>可用于查看当前InfiniBand设备状态。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/12/30/InfiniBand%E5%8F%8ARDMA%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/" data-id="cm5at1uer0000nxu268h14alu" data-title="InfiniBand及RDMA入门学习记录" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2024/12/21/Unikernel%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%8B%E6%94%AF%E6%8C%81Linux%E5%A4%9A%E5%BA%94%E7%94%A8%E7%9A%84%E5%89%8D%E6%9C%9F%E5%87%86%E5%A4%87/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Unikernel内核模式下支持Linux多应用的前期准备</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/12/">December 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/11/">November 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/12/30/InfiniBand%E5%8F%8ARDMA%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">InfiniBand及RDMA入门学习记录</a>
+          </li>
+        
+          <li>
+            <a href="/2024/12/21/Unikernel%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%8B%E6%94%AF%E6%8C%81Linux%E5%A4%9A%E5%BA%94%E7%94%A8%E7%9A%84%E5%89%8D%E6%9C%9F%E5%87%86%E5%A4%87/">Unikernel内核模式下支持Linux多应用的前期准备</a>
+          </li>
+        
+          <li>
+            <a href="/2024/12/20/Unikernel%E6%A8%A1%E5%BC%8F%E5%B0%9D%E8%AF%95%E5%8A%AB%E6%8C%81ecall%E4%BB%A5%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E8%BF%90%E8%A1%8C/">Unikernel模式尝试劫持ecall以支持Linux应用运行</a>
+          </li>
+        
+          <li>
+            <a href="/2024/12/20/ArceOS%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%A6%82%E4%BD%95%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E7%9A%84%E8%BF%90%E8%A1%8C/">ArceOS宏内核模式如何支持Linux应用的运行</a>
+          </li>
+        
+          <li>
+            <a href="/2024/11/30/Debug-OpenSBI%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/">Debug-OpenSBI版本错误</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 Chen Xumin<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
