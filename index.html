@@ -69,6 +69,115 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-论文阅读：PIM-Comm" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2025/02/13/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%EF%BC%9APIM-Comm/" class="article-date">
+  <time class="dt-published" datetime="2025-02-13T01:56:34.000Z" itemprop="datePublished">2025-02-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2025/02/13/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%EF%BC%9APIM-Comm/">论文阅读：PIM-Comm</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>一篇非常深入UPMEM PIM底层实现的文章，值得深读。</p>
+<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>目前UPMEM PIM的PIM间沟通性能低，通用且高性能的Collective Communication Framework缺失。</p>
+<p>性能低的原因有三点：</p>
+<ol>
+<li>纠缠组的存在导致难以有效利用带宽 </li>
+<li>通信过程需要CPU的参与</li>
+<li>通信流程为MRAM-VEC_REGISTER-CPU_MEMORY-VEC_REGISTER-MRAM</li>
+</ol>
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><h2 id="纠缠组-Entangled-Groups"><a href="#纠缠组-Entangled-Groups" class="headerlink" title="纠缠组 Entangled Groups"></a>纠缠组 Entangled Groups</h2><p><img src="/2024/11/21/hello-world/m/%E7%BA%A0%E7%BC%A0%E7%BB%84.png" alt="alt text"><br>要充分利用64位的访问总线，需要同时访问一个纠缠组中的8个bank，这八个bank分别位于同一个rank的8个chip中。</p>
+<h2 id="域转换-Domain-Transfer"><a href="#域转换-Domain-Transfer" class="headerlink" title="域转换 Domain Transfer"></a>域转换 Domain Transfer</h2><p>CPU对PIM读写数据，是通过AVX-512指令集（基于SIMD思想的x86高级向量扩展指令集）进行的。该指令集搭配的是512位向量寄存器（通常有32个），一个CPU核心可以在一个周期内，实现一条指令对单个512位寄存器中的多个数据执行相同操作（如读、写、与另一512位寄存器的多个数据进行并行算术运算等）。</p>
+<p>CPU和PIM对数据的布局要求不同，原来的UPMEM PIM设计默认会在读写数据时，在到达向量寄存器时进行一次“矩阵转置”，称之为域转换。</p>
+<h2 id="通信原语"><a href="#通信原语" class="headerlink" title="通信原语"></a>通信原语</h2><p><img src="/2024/11/21/hello-world/m/%E9%80%9A%E4%BF%A1%E5%8E%9F%E8%AF%AD.png" alt="alt text"></p>
+<h1 id="设计"><a href="#设计" class="headerlink" title="设计"></a>设计</h1><ol>
+<li><p>设计超立方体抽象通信拓扑，支持多实例的集体通信。通过合理地生成多立方体和实际PIM单元的映射，最大程度地符合内存并行传输特性（包括bank-level、chanell-level等）。<br><img src="/2024/11/21/hello-world/m/%E8%B6%85%E7%AB%8B%E6%96%B9%E4%BD%93.png" alt="alt text"><br>多实例通信在超立方体架构中，可以并行地沿着边进行，且相比于树拓扑和环拓扑，有着更好的对称性，从而结点间通信更加灵活。</p>
+</li>
+<li><p>通过在PIM端增加运算，并减少无意义的域转换（当CPU不需要进行算术运算，只是作为单纯的传输中介时，域转换没必要），减少CPU的参与</p>
+</li>
+<li><p>通过谨慎地排布数据，使得操作尽可能在向量寄存器中即可完成，而无需放到CPU内存中。</p>
+</li>
+</ol>
+<h1 id="比较对象"><a href="#比较对象" class="headerlink" title="比较对象"></a>比较对象</h1><h1 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h1><h1 id="启发"><a href="#启发" class="headerlink" title="启发"></a>启发</h1><h1 id="疑问"><a href="#疑问" class="headerlink" title="疑问"></a>疑问</h1>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2025/02/13/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%EF%BC%9APIM-Comm/" data-id="cm7wudimu0001idu2bdpp66eb" data-title="论文阅读：PIM-Comm" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-AI领域基本概念区分" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2025/01/06/AI%E9%A2%86%E5%9F%9F%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E5%8C%BA%E5%88%86/" class="article-date">
+  <time class="dt-published" datetime="2025-01-06T08:19:02.000Z" itemprop="datePublished">2025-01-06</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2025/01/06/AI%E9%A2%86%E5%9F%9F%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E5%8C%BA%E5%88%86/">AI领域基本概念区分</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="人工智能-（AI）"><a href="#人工智能-（AI）" class="headerlink" title="人工智能 （AI）"></a>人工智能 （AI）</h1><p>人工智能是一个广泛的领域，旨在开发能够像人类一样执行任务的系统。实现人工智能的方法包括<strong>专家系统、搜索与优化算法、机器学习</strong>等</p>
+<h1 id="机器学习"><a href="#机器学习" class="headerlink" title="机器学习"></a>机器学习</h1><p>一些入门的文章：<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_40181592/category_9106302.html%E3%80%82">https://blog.csdn.net/qq_40181592/category_9106302.html。</a></p>
+<p>在深度学习出来之前的机器学习方法，可以称之为传统机器学习，包括线性回归、FM、SVM支持向量机、决策树等。</p>
+<h1 id="FM-（Factorization-Machines-因子分解机）"><a href="#FM-（Factorization-Machines-因子分解机）" class="headerlink" title="FM （Factorization Machines 因子分解机）"></a>FM （Factorization Machines 因子分解机）</h1><p>论文：<a target="_blank" rel="noopener" href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=5694074&tag=1">https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=5694074&amp;tag=1</a><br>blog：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=Mzg5NTYyMDgyNg==&mid=2247489278&idx=1&sn=f3652394955d719bf02a91ca3b179ed2&source=41#wechat_redirect">https://mp.weixin.qq.com/s?__biz=Mzg5NTYyMDgyNg==&amp;mid=2247489278&amp;idx=1&amp;sn=f3652394955d719bf02a91ca3b179ed2&amp;source=41#wechat_redirect</a></p>
+<p>首先，说一下什么是Matrix Factorization（矩阵因子分解）？给定一个二维N*M的矩阵R，求一个N*K的矩阵W和一个K*M的矩阵V，使得WV尽可能等于R，误差定义为所有元素的误差之和（显然较大的K，训练出来的误差会更小），一般K会设置得比M和N小，从而将一个</p>
+<h1 id="深度学习"><a href="#深度学习" class="headerlink" title="深度学习"></a>深度学习</h1><p>深度学习是机器学习的一个子领域，主要基于<strong>多层神经网络</strong>，利用<strong>大规模数据</strong>和<strong>强大的计算能力</strong>来<strong>自动学习特征</strong>并完成任务。深度学习模型一般统称为DNN模型，具体包括MLP、RNN、GNN、Transformer等。</p>
+<ol>
+<li>多层神经网络：<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/illikang/article/details/82019945">https://blog.csdn.net/illikang/article/details/82019945</a><br>神经网络（NN），分为输入层、隐藏层（可选）、输出层。多层神经网络意味着隐藏层有多层。下一层的每个结点结果，由上一层的某些（也可能是全部）的结点，以及训练出来的参数（可以看作是这些边的“权重”）共同计算得到，就像神经元里的信息传递过程一样。简单的神经网络，如单层神经网络（也叫Perceptron 感知器），没有隐藏层，就算不上深度学习。<br><img src="/2024/11/21/hello-world/%E7%BB%8F%E7%BD%91%E7%BB%9C.png" alt="alt text"></li>
+<li>大规模数据：层与层之间的转换，都需要<strong>大量的参数</strong>，这些参数提高了模型的表达能力，但同时也要求大量可供训练的数据，所以数据集小的也不适合深度学习。</li>
+<li>强大的计算能力：相比于传统的机器学习，多层神经网络要训练大量参数，要求的计算资源非常多，所以神经网络的第二第三次兴起都源于计算能力的提升（CPU-&gt;二层神经网络，GPU-&gt;多层神经网络-&gt;深度学习）。</li>
+<li>自动学习特征：这正是深度学习与传统机器学习的不同之处<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/69776750">https://zhuanlan.zhihu.com/p/69776750</a> 。传统机器学习通常依赖专家来做特征工程，在建立某个模型前需要对应用领域有较深的理解，人工提炼出影响结果的特征，并用于模型中。而深度学习只需你提供一些最基本的向量化的输入（其中包含着一些最简单的特征，对应输入层的多个结点），然后在层层神经网络的推进中，特征之间不断交互，形成更高阶且非线性的特征。通过大量的训练，模型自动学习所有参数，自动考虑各种特征对于输出的“重要性”，从而形成输入和输出的复杂函数关系，颇有一种力大砖飞的美感。当然了，在这个过程中，相比于传统机器学习，自然也丧失了一些模型的可解释性。</li>
+</ol>
+<h1 id="MLP-（多层感知器）"><a href="#MLP-（多层感知器）" class="headerlink" title="MLP （多层感知器）"></a>MLP （多层感知器）</h1><p>MLP应该可以算是最简单的深度学习模型了，包含一系列串联的子模块，每个子模块包括一个全连接层（FC）和一个激活函数：<br><img src="/2024/11/21/hello-world/%E5%B1%82%E6%84%9F%E7%9F%A5%E5%99%A8.png" alt="alt text"><br>全连接层，输出Y的所有元素是输入X的所有元素的加权和，可以统一用矩阵计算表示为Y&#x3D;XW+b，W是权重矩阵，b是偏置向量，都是要训练的参数，每个全连接层各有各的W和b。激活函数一般就是一个非线性函数，对向量中的每个元素进行单独的非线性计算，得到一个新的向量。通过一些泰勒展开可以发现（不必深究），MLP可以捕获特征之间（输入的结点之间）的高阶和非线性交互，也就是说，可以自动学习到结果与某些高阶特征的关系，而不必人工放入某个高阶特征。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2025/01/06/AI%E9%A2%86%E5%9F%9F%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E5%8C%BA%E5%88%86/" data-id="cm7wudimr0000idu2bb9vfvf3" data-title="AI领域基本概念区分" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-InfiniBand及RDMA入门学习记录" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/12/30/InfiniBand%E5%8F%8ARDMA%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/" class="article-date">
@@ -95,7 +204,7 @@
 <h1 id="InfiniBand概念"><a href="#InfiniBand概念" class="headerlink" title="InfiniBand概念"></a>InfiniBand概念</h1><p>InfiniBand（无限带宽）是一种高性能、低延迟、高带宽的网络架构，专为大规模并行计算（如高性能计算、超算、数据中心等）设计， 关注<strong>存储设备之间的连接</strong>。它提供了一套<strong>完整的硬件和协议标准</strong>，支持多个通信模型，包括点对点通信、广播和组播。</p>
 <p>核心公司：Mellanox（迈络思），后被nvidia收购。</p>
 <p>核心技术：RDMA（远程直接内存访问）。后面以太网也支持了该技术（InfiniBand仍有许多特点，例如直接在硬件上支持了零拷贝）</p>
-<p>直接竞争者：Ethernet（以太网）。尤其是25Gps以上的高速以太网。二者主要区别如下，InfiniBand消灭了中间商：<br><img src="/2024/11/21/hello-world/DMA%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/InfiniBand%E5%92%8C%E4%BB%A5%E5%A4%AA%E7%BD%91%E7%9A%84%E5%8C%BA%E5%88%AB.png" alt="alt text"></p>
+<p>直接竞争者：Ethernet（以太网）。尤其是25Gbps以上的高速以太网。二者主要区别如下，InfiniBand消灭了中间商：<br><img src="/2024/11/21/hello-world/DMA%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/InfiniBand%E5%92%8C%E4%BB%A5%E5%A4%AA%E7%BD%91%E7%9A%84%E5%8C%BA%E5%88%AB.png" alt="alt text"></p>
 <h1 id="InfiniBand配套硬件（NVIDIA-Quantum-2-部分硬件）"><a href="#InfiniBand配套硬件（NVIDIA-Quantum-2-部分硬件）" class="headerlink" title="InfiniBand配套硬件（NVIDIA Quantum-2 部分硬件）"></a>InfiniBand配套硬件（NVIDIA Quantum-2 部分硬件）</h1><p>英伟达收购Mellanox之后，于2021年推出了自己的第七代NVIDIA InfiniBand架构——NVIDIA Quantum-2。该架构有一系列硬件。<br>下面命令可以查看当前服务器是否有对应设备以及实际型号（若该设备是pcie设备）</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lspci | grep Mellanox</span><br></pre></td></tr></table></figure>
 <h2 id="ConnectX系列-Adapter"><a href="#ConnectX系列-Adapter" class="headerlink" title="ConnectX系列 Adapter"></a>ConnectX系列 Adapter</h2><p>属于一个pcie设备，是一个InifiniBand网络架构（当然也支持RDMA）的网卡，两个有该网卡的服务器可以互相执行RDMA。</p>
@@ -108,6 +217,14 @@
 <h2 id="性能测试与调优"><a href="#性能测试与调优" class="headerlink" title="性能测试与调优"></a>性能测试与调优</h2><p>提供了perftest工具包（包含 ib_read_bw、ib_write_bw、ib_send_bw等功能），用于测试和调试 InfiniBand 或 RDMA 网络的性能。<br>如，服务端输入<code>ib_read_bw</code>，客户端输入<code>ib_read_bw 服务端地址</code>，即可测试客户端向服务端读取数据的带宽。</p>
 <p>perftest 5.7.0 前后版本不兼容。如果实在服务器与要测试的服务器的perftest版本兼容，也可以一台服务器测试性能，自己发自己收，因为rdma是全双工的，进出带宽不会互相影响。</p>
 <h2 id="设备管理支持"><a href="#设备管理支持" class="headerlink" title="设备管理支持"></a>设备管理支持</h2><p><code>ibstat</code>可用于查看当前InfiniBand设备状态。</p>
+<h1 id="InfiniBand-带宽"><a href="#InfiniBand-带宽" class="headerlink" title="InfiniBand 带宽"></a>InfiniBand 带宽</h1><p><img src="/2024/11/21/hello-world/DMA%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/InfiniBand%E5%90%84%E4%B8%AA%E6%A0%87%E5%87%86%E5%AF%B9%E5%BA%94%E5%B8%A6%E5%AE%BD.png" alt="InfiniBand各个标准对应带宽"><br>InfiniBand各个标准对应带宽，以上结果来自ChatGPT。可以看出，这个带宽大小基本都是高速以太网以上的标准了（&gt; 25Gbps）。<br>以上带宽都表示InfiniBand最大带宽（可以理解为最大网络传输带宽），测rdma传输的带宽时，需要跑满InfiniBand的四个通道且每次传输的数据包够大且带宽瓶颈为InfiniBand带宽时，实际带宽才能比较接近该最大带宽值。</p>
+<p>输入<code>ibstat</code>命令，可以看到当前服务器的InfiniBand适配网卡是什么标准。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">CA &#x27;mlx5_0&#x27;</span><br><span class="line">        CA type: MT4119</span><br><span class="line">        Number of ports: 1</span><br><span class="line">        Firmware version: 16.35.4030</span><br><span class="line">        Hardware version: 0</span><br><span class="line">        Node GUID: 0xb8cef6030097d6fe</span><br><span class="line">        System image GUID: 0xb8cef6030097d6fe</span><br><span class="line">        Port 1:</span><br><span class="line">                State: Active</span><br><span class="line">                Physical state: LinkUp</span><br><span class="line">                Rate: 100 # 100Gbps 对应EDR标准</span><br><span class="line">                Base lid: 12</span><br><span class="line">                LMC: 0</span><br><span class="line">                SM lid: 11</span><br><span class="line">                Capability mask: 0xa651e84a</span><br><span class="line">                Port GUID: 0xb8cef6030097d6fe</span><br><span class="line">                Link layer: InfiniBand # 当前是InfiniBand模式，有些也可能是以太网模式，说明此时当作以太网的网卡运行。</span><br></pre></td></tr></table></figure>
+
+<p>输入<code>lspci | grep Mellanox</code>找到对应InfiniBand适配网卡的设备号（如ad:00.0），再输入<code>sudo lspci -vv -s 设备号</code>，会有如下两个信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">LnkCap: Port #0, Speed 8GT/s, Width x16, ASPM not supported</span><br><span class="line">        ClockPM- Surprise- LLActRep- BwNot- ASPMOptComp+</span><br><span class="line">LnkSta: Speed 8GT/s (ok), Width x8 (downgraded)</span><br><span class="line">        TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-</span><br></pre></td></tr></table></figure>
+<p>LnkCap 和 LnkSta 字段显示了当前设备支持和实际使用的 PCIe 速率和通道宽度。<br>此处可以查询各个pcie版本各个通道数对应的<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_42229404/article/details/84069859%E3%80%82">https://blog.csdn.net/weixin_42229404/article/details/84069859。</a></p>
+<p>如上面所示，实际该网卡是8通道接入pcie，导致此时pcie通道的带宽是7.877GB&#x2F;s，而该EDR标准网卡的InfiniBand带宽为100Gbps（约为12.5GB&#x2F;s），则rdma带宽测试是，瓶颈就会在pcie上，如果改回16通道，带宽就会是InfiniBand。</p>
 
       
     </div>
@@ -431,99 +548,6 @@
 
 
   
-    <article id="post-Unikernel组件之axalloc" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxalloc/" class="article-date">
-  <time class="dt-published" datetime="2024-11-25T06:56:56.000Z" itemprop="datePublished">2024-11-25</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxalloc/">Unikernel组件之axalloc</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>在理解了Unikernel的基本启动流程之后，不难发现，并没有全局内存分配器，也就是说，虽然此时页表中有一段free_memory空间映射（所谓的堆空间），但没有一个管理这段虚拟内存的分配器，所以动态内存分配操作都是不支持的。</p>
-        
-          <p class="article-more-link">
-            <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxalloc/#more">Read More</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxalloc/" data-id="cm3wsgb6j00004eu25ygbec8d" data-title="Unikernel组件之axalloc" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-Unikernel的基本启动流程" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/11/25/Unikernel%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/" class="article-date">
-  <time class="dt-published" datetime="2024-11-25T01:19:52.000Z" itemprop="datePublished">2024-11-25</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/11/25/Unikernel%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/">Unikernel的基本启动流程</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>本文基于ArceOS简化版的代码（依靠riscv64_qemu架构），介绍一个简单的组件化的Unikernel的启动流程。<br>仓库链接：<a target="_blank" rel="noopener" href="https://github.com/arceos-org/oscamp.git">https://github.com/arceos-org/oscamp.git</a></p>
-<h1 id="Unikernel"><a href="#Unikernel" class="headerlink" title="Unikernel"></a>Unikernel</h1><p>应用与内核：</p>
-<ol>
-<li>处于相同的特权级-内核态</li>
-<li>共享同一个地址空间</li>
-<li>编译形成一个Image，一体运行</li>
-</ol>
-<p>Unikernel可以看作是操作系统内核的基础，基于此，可以发展出更常见的宏内核</p>
-        
-          <p class="article-more-link">
-            <a href="/2024/11/25/Unikernel%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/#more">Read More</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/11/25/Unikernel%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/" data-id="cm3wivaz70000gku26ped9u7m" data-title="Unikernel的基本启动流程" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -547,7 +571,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/12/">December 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/11/">November 2024</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/02/">February 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/01/">January 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/12/">December 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/11/">November 2024</a></li></ul>
     </div>
   </div>
 
@@ -560,6 +584,14 @@
       <ul>
         
           <li>
+            <a href="/2025/02/13/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%EF%BC%9APIM-Comm/">论文阅读：PIM-Comm</a>
+          </li>
+        
+          <li>
+            <a href="/2025/01/06/AI%E9%A2%86%E5%9F%9F%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E5%8C%BA%E5%88%86/">AI领域基本概念区分</a>
+          </li>
+        
+          <li>
             <a href="/2024/12/30/InfiniBand%E5%8F%8ARDMA%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">InfiniBand及RDMA入门学习记录</a>
           </li>
         
@@ -569,14 +601,6 @@
         
           <li>
             <a href="/2024/12/20/Unikernel%E6%A8%A1%E5%BC%8F%E5%B0%9D%E8%AF%95%E5%8A%AB%E6%8C%81ecall%E4%BB%A5%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E8%BF%90%E8%A1%8C/">Unikernel模式尝试劫持ecall以支持Linux应用运行</a>
-          </li>
-        
-          <li>
-            <a href="/2024/12/20/ArceOS%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%A6%82%E4%BD%95%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E7%9A%84%E8%BF%90%E8%A1%8C/">ArceOS宏内核模式如何支持Linux应用的运行</a>
-          </li>
-        
-          <li>
-            <a href="/2024/11/30/Debug-OpenSBI%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/">Debug-OpenSBI版本错误</a>
           </li>
         
       </ul>
@@ -592,7 +616,7 @@
   <div class="outer">
     <div id="footer-info" class="inner">
       
-      &copy; 2024 Chen Xumin<br>
+      &copy; 2025 Chen Xumin<br>
       Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>

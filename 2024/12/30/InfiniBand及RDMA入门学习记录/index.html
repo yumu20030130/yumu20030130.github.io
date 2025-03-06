@@ -14,8 +14,9 @@
 <meta property="og:description" content="链接：https:&#x2F;&#x2F;cloud.tencent.com&#x2F;developer&#x2F;article&#x2F;2314766 InfiniBand概念InfiniBand（无限带宽）是一种高性能、低延迟、高带宽的网络架构，专为大规模并行计算（如高性能计算、超算、数据中心等）设计， 关注存储设备之间的连接。它提供了一套完整的硬件和协议标准，支持多个通信模型，包括点对点通信、广播和组播。 核心公司：Mellanox（">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://example.com/2024/11/21/hello-world/DMA%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/InfiniBand%E5%92%8C%E4%BB%A5%E5%A4%AA%E7%BD%91%E7%9A%84%E5%8C%BA%E5%88%AB.png">
+<meta property="og:image" content="http://example.com/2024/11/21/hello-world/DMA%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/InfiniBand%E5%90%84%E4%B8%AA%E6%A0%87%E5%87%86%E5%AF%B9%E5%BA%94%E5%B8%A6%E5%AE%BD.png">
 <meta property="article:published_time" content="2024-12-30T07:24:10.000Z">
-<meta property="article:modified_time" content="2024-12-30T08:33:38.853Z">
+<meta property="article:modified_time" content="2024-12-31T05:28:02.933Z">
 <meta property="article:author" content="Chen Xumin">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://example.com/2024/11/21/hello-world/DMA%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/InfiniBand%E5%92%8C%E4%BB%A5%E5%A4%AA%E7%BD%91%E7%9A%84%E5%8C%BA%E5%88%AB.png">
@@ -99,7 +100,7 @@
 <h1 id="InfiniBand概念"><a href="#InfiniBand概念" class="headerlink" title="InfiniBand概念"></a>InfiniBand概念</h1><p>InfiniBand（无限带宽）是一种高性能、低延迟、高带宽的网络架构，专为大规模并行计算（如高性能计算、超算、数据中心等）设计， 关注<strong>存储设备之间的连接</strong>。它提供了一套<strong>完整的硬件和协议标准</strong>，支持多个通信模型，包括点对点通信、广播和组播。</p>
 <p>核心公司：Mellanox（迈络思），后被nvidia收购。</p>
 <p>核心技术：RDMA（远程直接内存访问）。后面以太网也支持了该技术（InfiniBand仍有许多特点，例如直接在硬件上支持了零拷贝）</p>
-<p>直接竞争者：Ethernet（以太网）。尤其是25Gps以上的高速以太网。二者主要区别如下，InfiniBand消灭了中间商：<br><img src="/2024/11/21/hello-world/DMA%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/InfiniBand%E5%92%8C%E4%BB%A5%E5%A4%AA%E7%BD%91%E7%9A%84%E5%8C%BA%E5%88%AB.png" alt="alt text"></p>
+<p>直接竞争者：Ethernet（以太网）。尤其是25Gbps以上的高速以太网。二者主要区别如下，InfiniBand消灭了中间商：<br><img src="/2024/11/21/hello-world/DMA%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/InfiniBand%E5%92%8C%E4%BB%A5%E5%A4%AA%E7%BD%91%E7%9A%84%E5%8C%BA%E5%88%AB.png" alt="alt text"></p>
 <h1 id="InfiniBand配套硬件（NVIDIA-Quantum-2-部分硬件）"><a href="#InfiniBand配套硬件（NVIDIA-Quantum-2-部分硬件）" class="headerlink" title="InfiniBand配套硬件（NVIDIA Quantum-2 部分硬件）"></a>InfiniBand配套硬件（NVIDIA Quantum-2 部分硬件）</h1><p>英伟达收购Mellanox之后，于2021年推出了自己的第七代NVIDIA InfiniBand架构——NVIDIA Quantum-2。该架构有一系列硬件。<br>下面命令可以查看当前服务器是否有对应设备以及实际型号（若该设备是pcie设备）</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lspci | grep Mellanox</span><br></pre></td></tr></table></figure>
 <h2 id="ConnectX系列-Adapter"><a href="#ConnectX系列-Adapter" class="headerlink" title="ConnectX系列 Adapter"></a>ConnectX系列 Adapter</h2><p>属于一个pcie设备，是一个InifiniBand网络架构（当然也支持RDMA）的网卡，两个有该网卡的服务器可以互相执行RDMA。</p>
@@ -112,6 +113,14 @@
 <h2 id="性能测试与调优"><a href="#性能测试与调优" class="headerlink" title="性能测试与调优"></a>性能测试与调优</h2><p>提供了perftest工具包（包含 ib_read_bw、ib_write_bw、ib_send_bw等功能），用于测试和调试 InfiniBand 或 RDMA 网络的性能。<br>如，服务端输入<code>ib_read_bw</code>，客户端输入<code>ib_read_bw 服务端地址</code>，即可测试客户端向服务端读取数据的带宽。</p>
 <p>perftest 5.7.0 前后版本不兼容。如果实在服务器与要测试的服务器的perftest版本兼容，也可以一台服务器测试性能，自己发自己收，因为rdma是全双工的，进出带宽不会互相影响。</p>
 <h2 id="设备管理支持"><a href="#设备管理支持" class="headerlink" title="设备管理支持"></a>设备管理支持</h2><p><code>ibstat</code>可用于查看当前InfiniBand设备状态。</p>
+<h1 id="InfiniBand-带宽"><a href="#InfiniBand-带宽" class="headerlink" title="InfiniBand 带宽"></a>InfiniBand 带宽</h1><p><img src="/2024/11/21/hello-world/DMA%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/InfiniBand%E5%90%84%E4%B8%AA%E6%A0%87%E5%87%86%E5%AF%B9%E5%BA%94%E5%B8%A6%E5%AE%BD.png" alt="InfiniBand各个标准对应带宽"><br>InfiniBand各个标准对应带宽，以上结果来自ChatGPT。可以看出，这个带宽大小基本都是高速以太网以上的标准了（&gt; 25Gbps）。<br>以上带宽都表示InfiniBand最大带宽（可以理解为最大网络传输带宽），测rdma传输的带宽时，需要跑满InfiniBand的四个通道且每次传输的数据包够大且带宽瓶颈为InfiniBand带宽时，实际带宽才能比较接近该最大带宽值。</p>
+<p>输入<code>ibstat</code>命令，可以看到当前服务器的InfiniBand适配网卡是什么标准。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">CA &#x27;mlx5_0&#x27;</span><br><span class="line">        CA type: MT4119</span><br><span class="line">        Number of ports: 1</span><br><span class="line">        Firmware version: 16.35.4030</span><br><span class="line">        Hardware version: 0</span><br><span class="line">        Node GUID: 0xb8cef6030097d6fe</span><br><span class="line">        System image GUID: 0xb8cef6030097d6fe</span><br><span class="line">        Port 1:</span><br><span class="line">                State: Active</span><br><span class="line">                Physical state: LinkUp</span><br><span class="line">                Rate: 100 # 100Gbps 对应EDR标准</span><br><span class="line">                Base lid: 12</span><br><span class="line">                LMC: 0</span><br><span class="line">                SM lid: 11</span><br><span class="line">                Capability mask: 0xa651e84a</span><br><span class="line">                Port GUID: 0xb8cef6030097d6fe</span><br><span class="line">                Link layer: InfiniBand # 当前是InfiniBand模式，有些也可能是以太网模式，说明此时当作以太网的网卡运行。</span><br></pre></td></tr></table></figure>
+
+<p>输入<code>lspci | grep Mellanox</code>找到对应InfiniBand适配网卡的设备号（如ad:00.0），再输入<code>sudo lspci -vv -s 设备号</code>，会有如下两个信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">LnkCap: Port #0, Speed 8GT/s, Width x16, ASPM not supported</span><br><span class="line">        ClockPM- Surprise- LLActRep- BwNot- ASPMOptComp+</span><br><span class="line">LnkSta: Speed 8GT/s (ok), Width x8 (downgraded)</span><br><span class="line">        TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-</span><br></pre></td></tr></table></figure>
+<p>LnkCap 和 LnkSta 字段显示了当前设备支持和实际使用的 PCIe 速率和通道宽度。<br>此处可以查询各个pcie版本各个通道数对应的<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_42229404/article/details/84069859%E3%80%82">https://blog.csdn.net/weixin_42229404/article/details/84069859。</a></p>
+<p>如上面所示，实际该网卡是8通道接入pcie，导致此时pcie通道的带宽是7.877GB&#x2F;s，而该EDR标准网卡的InfiniBand带宽为100Gbps（约为12.5GB&#x2F;s），则rdma带宽测试是，瓶颈就会在pcie上，如果改回16通道，带宽就会是InfiniBand。</p>
 
       
     </div>
@@ -125,6 +134,15 @@
   
     
 <nav id="article-nav">
+  
+    <a href="/2025/01/06/AI%E9%A2%86%E5%9F%9F%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E5%8C%BA%E5%88%86/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          AI领域基本概念区分
+        
+      </div>
+    </a>
   
   
     <a href="/2024/12/21/Unikernel%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%8B%E6%94%AF%E6%8C%81Linux%E5%A4%9A%E5%BA%94%E7%94%A8%E7%9A%84%E5%89%8D%E6%9C%9F%E5%87%86%E5%A4%87/" id="article-nav-older" class="article-nav-link-wrap">
@@ -154,7 +172,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/12/">December 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/11/">November 2024</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/02/">February 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/01/">January 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/12/">December 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/11/">November 2024</a></li></ul>
     </div>
   </div>
 
@@ -167,6 +185,14 @@
       <ul>
         
           <li>
+            <a href="/2025/02/13/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%EF%BC%9APIM-Comm/">论文阅读：PIM-Comm</a>
+          </li>
+        
+          <li>
+            <a href="/2025/01/06/AI%E9%A2%86%E5%9F%9F%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E5%8C%BA%E5%88%86/">AI领域基本概念区分</a>
+          </li>
+        
+          <li>
             <a href="/2024/12/30/InfiniBand%E5%8F%8ARDMA%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">InfiniBand及RDMA入门学习记录</a>
           </li>
         
@@ -176,14 +202,6 @@
         
           <li>
             <a href="/2024/12/20/Unikernel%E6%A8%A1%E5%BC%8F%E5%B0%9D%E8%AF%95%E5%8A%AB%E6%8C%81ecall%E4%BB%A5%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E8%BF%90%E8%A1%8C/">Unikernel模式尝试劫持ecall以支持Linux应用运行</a>
-          </li>
-        
-          <li>
-            <a href="/2024/12/20/ArceOS%E5%AE%8F%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E5%A6%82%E4%BD%95%E6%94%AF%E6%8C%81Linux%E5%BA%94%E7%94%A8%E7%9A%84%E8%BF%90%E8%A1%8C/">ArceOS宏内核模式如何支持Linux应用的运行</a>
-          </li>
-        
-          <li>
-            <a href="/2024/11/30/Debug-OpenSBI%E7%89%88%E6%9C%AC%E9%94%99%E8%AF%AF/">Debug-OpenSBI版本错误</a>
           </li>
         
       </ul>
@@ -199,7 +217,7 @@
   <div class="outer">
     <div id="footer-info" class="inner">
       
-      &copy; 2024 Chen Xumin<br>
+      &copy; 2025 Chen Xumin<br>
       Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>

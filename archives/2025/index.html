@@ -4,21 +4,15 @@
   <meta charset="utf-8">
   
   
-  <title>Unikernel组件之paging | Yumu</title>
+  <title>Archives: 2025 | Yumu</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="在理解了Unikernel的基本启动流程之后，不难发现，其中并没有对MMIO相关的区域做映射，且映射的粒度也很粗，即要实现重建映射。">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Unikernel组件之paging">
-<meta property="og:url" content="http://example.com/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Bpaging/index.html">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Yumu">
+<meta property="og:url" content="http://example.com/archives/2025/index.html">
 <meta property="og:site_name" content="Yumu">
-<meta property="og:description" content="在理解了Unikernel的基本启动流程之后，不难发现，其中并没有对MMIO相关的区域做映射，且映射的粒度也很粗，即要实现重建映射。">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://example.com/2024/11/21/hello-world/paging/%E9%87%8D%E5%BB%BA%E6%98%A0%E5%B0%84.png">
-<meta property="article:published_time" content="2024-11-25T07:57:16.000Z">
-<meta property="article:modified_time" content="2024-11-25T08:50:52.670Z">
 <meta property="article:author" content="Chen Xumin">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2024/11/21/hello-world/paging/%E9%87%8D%E5%BB%BA%E6%98%A0%E5%B0%84.png">
   
     <link rel="alternate" href="/atom.xml" title="Yumu" type="application/atom+xml">
   
@@ -73,72 +67,58 @@
 </header>
 
       <div class="outer">
-        <section id="main"><article id="post-Unikernel组件之paging" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Bpaging/" class="article-date">
-  <time class="dt-published" datetime="2024-11-25T07:57:16.000Z" itemprop="datePublished">2024-11-25</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
+        <section id="main">
   
-    <h1 class="p-name article-title" itemprop="headline name">
-      Unikernel组件之paging
+  
+    
+    
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2025" class="archive-year">2025</a>
+        </div>
+        <div class="archives">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      <a href="/2025/02/13/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%EF%BC%9APIM-Comm/" class="archive-article-date">
+  <time class="dt-published" datetime="2025-02-13T01:56:34.000Z" itemprop="datePublished">Feb 13</time>
+</a>
+      
+  
+    <h1 itemprop="name">
+      <a class="archive-article-title" href="/2025/02/13/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%EF%BC%9APIM-Comm/">论文阅读：PIM-Comm</a>
     </h1>
   
 
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>在理解了Unikernel的基本启动流程之后，不难发现，其中并没有对MMIO相关的区域做映射，且映射的粒度也很粗，即要实现重建映射。</p>
-<span id="more"></span>
-
-<p><img src="/2024/11/21/hello-world/paging/%E9%87%8D%E5%BB%BA%E6%98%A0%E5%B0%84.png" alt="alt text"><br>流程大致如下：</p>
-<ol>
-<li><strong>依赖axalloc</strong>，重新分配一页做根页表</li>
-<li>根据elf中标记的各个段的flag，合理地设置各个段的页表项在页表中的可读可写性等，且此时不做巨页映射了，都是4K的小页映射，但还是一对一的固定偏移静态映射，一开始就写好在页表里了。</li>
-<li>SBI不做映射，这是为了安全性考虑，用户本来也不应该能直接访问SBI，然后这段虚拟地址空间可以被重新利用。</li>
-<li>映射MMIO设备</li>
-<li>更改satp寄存器，换为新根页表的物理地址</li>
-</ol>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Bpaging/" data-id="cm3wsgb6t00014eu226l32gs7" data-title="Unikernel组件之paging" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-    </footer>
+    </header>
   </div>
+</article>
   
     
-<nav id="article-nav">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      <a href="/2025/01/06/AI%E9%A2%86%E5%9F%9F%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E5%8C%BA%E5%88%86/" class="archive-article-date">
+  <time class="dt-published" datetime="2025-01-06T08:19:02.000Z" itemprop="datePublished">Jan 6</time>
+</a>
+      
   
-    <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxtask/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          Unikernel组件之axtask
-        
-      </div>
-    </a>
+    <h1 itemprop="name">
+      <a class="archive-article-title" href="/2025/01/06/AI%E9%A2%86%E5%9F%9F%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E5%8C%BA%E5%88%86/">AI领域基本概念区分</a>
+    </h1>
   
-  
-    <a href="/2024/11/25/Unikernel%E7%BB%84%E4%BB%B6%E4%B9%8Baxalloc/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">Unikernel组件之axalloc</div>
-    </a>
-  
-</nav>
 
-  
+    </header>
+  </div>
 </article>
+  
+  
+    </div></section>
+  
 
 
 </section>
